@@ -23,7 +23,7 @@ limitations under the License.
 
 # Apache Beam 编程指南
 
-**Beam编程指南**适用于希望使用Beam SDK创建数据处理管道的Beam用户。 它为使用Beam SDK类构建和测试您的管道提供了指导。 它不是一个详细且全面的参考，而是一个与语言无关的高级指南，以编程方式构建您的Beam管道。 在编写本指南时，包含多种语言的代码示例，用来帮助说明如何在您的管道中实现Beam概念。
+**Beam编程指南**适用于希望使用Beam SDK创建数据处理管道的Beam用户。 它为使用Beam SDK类构建和测试您的管道提供了指导。 它不是一个详细且全面的参考，而是一个与语言无关，以编程方式构建您的Beam管道的高级指南。 在编写本指南时，包含多种语言的代码示例，用来帮助说明如何在您的管道中实现Beam概念。
 
 <nav class="language-switcher">
   <strong>适应于:</strong>
