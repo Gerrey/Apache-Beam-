@@ -23,7 +23,7 @@ limitations under the License.
 
 # Apache Beam 编程指南
 
-**Beam编程指南**适用于希望使用Beam SDK创建数据处理管道的Beam用户。 它为使用Beam SDK类构建和测试您的管道提供了指导。 它不是一个详细且全面的参考，而是一个与语言无关，以编程方式构建您的Beam管道的高级指南。 在编写本指南时，包含多种语言的代码示例，用来帮助说明如何在您的管道中实现Beam概念。
+**Beam编程指南**适用于希望使用Beam SDK创建数据处理管道的Beam用户。 它为使用Beam SDK类构建和测试你的管道提供了指导。 它不是一个详细且全面的参考，而是一个与语言无关，以编程方式构建你的Beam管道的高级指南。 在编写本指南时，包含多种语言的代码示例，用来帮助说明如何在你的管道中实现Beam概念。
 
 <nav class="language-switcher">
   <strong>适应于:</strong>
@@ -36,17 +36,17 @@ limitations under the License.
 
 ## 1. 概述{#overview}
 
-为了使用Beam，您首先需要使用其中一种Beam SDK中的类来创建一个驱动程序。 您的驱动程序*定义*了您的管道，包括所有输入，转换和输出; 
-它还为您的管道设置执行选项（通常使用命令行选项传递）。 其中包括Pipeline Runner，它反过来确定您的管道将运行在哪个后端。
+为了使用Beam，你首先需要选择一种Beam SDK，来创建一个驱动程序，它*定义*了你的管道，包括所有输入，变换和输出; 
+它还为你的管道设置了执行选项（一般用在命令行操作）。 其中包括Pipeline Runner，它反过来确定你的管道将运行在哪个后端。
 
 
-Beam SDK提供了许多抽象概念，简化了大规模分布式数据处理的机制。 相同的Beam抽象适用于批处理和流数据源。 当您创建Beam管道时，您可以根据这些抽象来考虑数据处理任务。 它们包括：
+Beam SDK提供了许多抽象概念，简化了大规模分布式数据处理的机制。 相同的Beam抽象适用于批处理和流数据源。 当你创建一个Beam管道时，你可以根据这些抽象来考虑数据处理任务。 它们包括：
 
-* `Pipeline`: 一个 `Pipeline`，从头到尾封装了您的整个数据处理任务。这包括读取输入数据，转换数据和写入输出数据。所有Beam驱动程序都必须创建一个 `Pipeline`。当您创建 `Pipeline`时，还必须指定执行选项，这些选项告诉 `Pipeline`，在何处以及如何运行。
+* `Pipeline`: 一个 `Pipeline`，从头到尾封装了你的整个数据处理任务。它包括读取输入数据，变换数据和写入输出数据。所有Beam驱动程序都必须创建一个 `Pipeline`。当你创建 `Pipeline`时，还必须指定执行选项，这些选项告诉 `Pipeline`，在何处以及如何运行。
 
-* `PCollection`: 一个 `PCollection` 代表着您Beam管道操作的分布式数据集。数据集可以是*有界*的，这意味着它来自像文件这样的固定源， 或者也可以是*无界*的，这意味着它来自通过订阅或其他机制不断更新的源。 您的管道通常通过从外部数据源读取数据来创建初始的 `PCollection`，但您也可以从驱动程序中的内存数据创建一个 `PCollection`。从那里开始， `PCollection` 将作为您管道中每个步骤的输入和输出。
+* `PCollection`: 一个 `PCollection` 代表着你的Beam管道操作的分布式数据集。数据集可以是*有界*的，这意味着它来自像文件这样的固定源， 或者也可以是*无界*的，这意味着它来自通过订阅或其他机制不断更新的源。 你的管道通常通过从外部数据源读取数据来创建初始的 `PCollection`，但你也可以从驱动程序中的内存数据创建一个 `PCollection`。从那里开始， `PCollection` 将作为你管道中每个步骤的输入和输出。
 
-* `PTransform`: 一个 `PTransform` 代表着您管道中的数据处理操作或步骤。 每个 `PTransform` 都将一个或多个 `PCollection` 对象作为输入，执行您在该
+* `PTransform`: 一个 `PTransform` 代表着你管道中的数据处理操作或步骤。 每个 `PTransform` 都将一个或多个 `PCollection` 对象作为输入，执行你在该
   `PCollection` 的元素上提供的处理函数，并生成零个或多个输出 `PCollection` 对象。
 
 * I/O 转换: Beam附带了许多“IO”——`PTransform` 库，它可以读或写数据到各种外部存储系统。
@@ -59,14 +59,14 @@ Beam SDK提供了许多抽象概念，简化了大规模分布式数据处理的
 * 使用IO，将最终的转换后的 `PCollection` 写入外部源。
 * **运行** 管道， 使用指派的 Pipeline Runner。
 
-当您运行您的Beam驱动程序时，您指派的Pipeline Runner会根据您创建的 `PCollection`对象和应用的转换为您的管道构建一个**工作流图** 。然后使用适当的分布式处理后端执行该图，从而成为该后端的异步“作业”(或等效的)。
+当你运行你的Beam驱动程序时，你指派的Pipeline Runner会根据你创建的 `PCollection`对象和应用的转换为你的管道构建一个**工作流图** 。然后使用适当的分布式处理后端执行该图，从而成为该后端的异步“作业”(或等效的)。
 
 ## 2. 创建一个管道 {#creating-a-pipeline}
 
-`Pipeline` 抽象封装了您数据处理任务中的所有数据和步骤。  您的Beam驱动程序通常首先构建一个
+`Pipeline` 抽象封装了你数据处理任务中的所有数据和步骤。  你的Beam驱动程序通常首先构建一个
 [Pipeline](https://beam.apache.org/releases/javadoc/2.12.0/index.html?org/apache/beam/sdk/Pipeline.html) [Pipeline](https://github.com/apache/beam/blob/master/sdks/python/apache_beam/pipeline.py) 对象, ，然后使用该对象作为基础， 用于将管道的数据集创建为 `PCollection`，并将它的操作创建为 `Transform`。
 
-为了使用Beam，您的驱动程序必须首先创建Beam SDK类 `Pipeline` 的实例 (通常在 `main()` 函数中). 当您创建您的 `Pipeline` 时，您还需要设置一些**配置选项**。 您可以以编程方式设置管道的配置选项，, 但通常更容易的做法是提前设置选项（或从命令行读取它们），并在创建对象时将它们传递给 `Pipeline` 对象。
+为了使用Beam，你的驱动程序必须首先创建Beam SDK类 `Pipeline` 的实例 (通常在 `main()` 函数中). 当你创建你的 `Pipeline` 时，你还需要设置一些**配置选项**。 你可以以编程方式设置管道的配置选项，, 但通常更容易的做法是提前设置选项（或从命令行读取它们），并在创建对象时将它们传递给 `Pipeline` 对象。
 
 ```java
 // 首先定义管道的选项。
@@ -88,15 +88,15 @@ p, s := beam.NewPipelineWithRoot()
 
 ### 2.1. 配置管道选项 {#configuring-pipeline-options}
 
-使用管道选项来配置您管道的不同方面，例如，将执行管道的管道运行程序以及所选运行程序所需的任何特定于运行程序的配置。 您的管道选项可能包含诸如项目ID或存储文件的位置之类的信息。
+使用管道选项来配置你管道的不同方面，例如，将执行管道的管道运行程序以及所选运行程序所需的任何特定于运行程序的配置。 你的管道选项可能包含诸如项目ID或存储文件的位置之类的信息。
 
-当在您选择的运行器上运行管道时，您的代码将可以使用PipelineOptions的副本。例如，如果将一个PipelineOptions参数添加到DoFn的 `@ProcessElement` 方法，它将由系统填充。
+当在你选择的运行器上运行管道时，你的代码将可以使用PipelineOptions的副本。例如，如果将一个PipelineOptions参数添加到DoFn的 `@ProcessElement` 方法，它将由系统填充。
 
 #### 2.1.1. 从命令行参数设置PipelineOptions {#pipeline-options-cli}
 
-虽然您可以通过创建一个 `PipelineOptions` 对象并直接设置字段来配置管道，但Beam SDK包含一个命令行解析器，您可以通过它使用命令行参数在 `PipelineOptions` 中设置字段。
+虽然你可以通过创建一个 `PipelineOptions` 对象并直接设置字段来配置管道，但Beam SDK包含一个命令行解析器，你可以通过它使用命令行参数在 `PipelineOptions` 中设置字段。
 
-为了从命令行中读取选项，请构造您的 `PipelineOptions` 对象，如以下示例代码所示：
+为了从命令行中读取选项，请构造你的 `PipelineOptions` 对象，如以下示例代码所示：
 
 ```java
 PipelineOptions options =
@@ -123,13 +123,13 @@ flag.Parse()
 
 > **注意:** 追加方法 `.withValidation` 将检查所需的命令行参数并验证参数值。
 
-以这种方式构建您的 `PipelineOptions`，允许您将任何选项指定为命令行参数。
+以这种方式构建你的 `PipelineOptions`，允许你将任何选项指定为命令行参数。
 
 > **注意:** [WordCount管道示例](https://beam.apache.org/get-started/wordcount-example/) 演示了如何使用命令行选项在运行时设置管道选项。
 
 #### 2.1.2. 创建自定义选项 {#creating-custom-options}
 
-除标准 `PipelineOptions` 外，您还可以添加您自己的自定义选项。为了添加您自己的选项，请为每个选项定义带有getter和setter方法的接口，如下面的示例所示，用于添加 `input` 和 `output` 自定义选项:
+除标准 `PipelineOptions` 外，你还可以添加你自己的自定义选项。为了添加你自己的选项，请为每个选项定义带有getter和setter方法的接口，如下面的示例所示，用于添加 `input` 和 `output` 自定义选项:
 
 ```java
 public interface MyOptions extends PipelineOptions {
@@ -155,9 +155,9 @@ var (
 )
 ```
 
-您还可以指定一个描述，该描述在用户将 `--help` 作为命令行参数传递时显示，并显示默认值。
+你还可以指定一个描述，该描述在用户将 `--help` 作为命令行参数传递时显示，并显示默认值。
 
-您可以使用注解设置描述和默认值，如下所示：
+你可以使用注解设置描述和默认值，如下所示：
 
 ```java
 public interface MyOptions extends PipelineOptions {
@@ -190,10 +190,10 @@ var (
   output = flag.String("output", "gs://my-bucket/output", "Output for the pipeline")
 )
 ```
-我们建议您使用 `PipelineOptionsFactory` 注册您的接口，然后在创建 `PipelineOptions` 对象时传递该接口。 当您使用 `PipelineOptionsFactory` 注册您的接口时，`--help` 可以找到您的自定义选项接口并将它添加到 `--help` 命令的输出中。 `PipelineOptionsFactory` 还将验证您的自定义选项是否与所有其他已注册的选项兼容。
+我们建议你使用 `PipelineOptionsFactory` 注册你的接口，然后在创建 `PipelineOptions` 对象时传递该接口。 当你使用 `PipelineOptionsFactory` 注册你的接口时，`--help` 可以找到你的自定义选项接口并将它添加到 `--help` 命令的输出中。 `PipelineOptionsFactory` 还将验证你的自定义选项是否与所有其他已注册的选项兼容。
 
 
-下面的示例代码，显示了如何使用 `PipelineOptionsFactory` 来注册您的自定义选项接口：
+下面的示例代码，显示了如何使用 `PipelineOptionsFactory` 来注册你的自定义选项接口：
 
 ```java
 PipelineOptionsFactory.register(MyOptions.class);
@@ -202,24 +202,24 @@ MyOptions options = PipelineOptionsFactory.fromArgs(args)
                                                 .as(MyOptions.class);
 ```
 
-现在，您的管道可以接受 `--input=value` 和 `--output=value` 作为命令行参数。
+现在，你的管道可以接受 `--input=value` 和 `--output=value` 作为命令行参数。
 
 ## 3. PCollections {#pcollections}
 
 [PCollection](https://beam.apache.org/releases/javadoc/2.12.0/index.html?org/apache/beam/sdk/values/PCollection.html)
-`PCollection` 抽象表示一个潜在分布的，多元素数据集。 您可以将 `PCollection` 视为“管道”数据; Beam的变换使用 `PCollection` 对象作为输入和输出。  因此，如果你要处理您管道中的数据，就必须采用 `PCollection` 的形式。
+`PCollection` 抽象表示一个潜在分布的，多元素数据集。 你可以将 `PCollection` 视为“管道”数据; Beam的变换使用 `PCollection` 对象作为输入和输出。  因此，如果你要处理你管道中的数据，就必须采用 `PCollection` 的形式。
 
-在您创建您的 `Pipeline` 之后，您首先需要以某种形式创建至少一个  `PCollection` 。 您创建的  `PCollection` 将用作管道中第一个操作的输入。
+在你创建你的 `Pipeline` 之后，你首先需要以某种形式创建至少一个  `PCollection` 。 你创建的  `PCollection` 将用作管道中第一个操作的输入。
 
 ### 3.1. 创建一个PCollection {#creating-a-pcollection}
 
-您可以通过使用Beam的[Source API](#pipeline-io)从外部源读取数据来创建一个 `PCollection` ，也可以在您的驱动程序中，创建一个存储在内存集合类中的数据的 `PCollection` 。前者通常是如何获取数据的生产管道; Beam的Source API包含了适配器，可以帮助您从外部源读取大型基于云的文件，数据库或订阅服务。后者主要是用于测试和调试的目的。
+你可以通过使用Beam的[Source API](#pipeline-io)从外部源读取数据来创建一个 `PCollection` ，也可以在你的驱动程序中，创建一个存储在内存集合类中的数据的 `PCollection` 。前者通常是如何获取数据的生产管道; Beam的Source API包含了适配器，可以帮助你从外部源读取大型基于云的文件，数据库或订阅服务。后者主要是用于测试和调试的目的。
 
 #### 3.1.1. 从外部源读取 {#reading-external-source}
 
 要从外部源读取数据，请使用Beam提供的一个[I/O适配器](#pipeline-io)。 每个适配器的确切用法各不相同，但它们都从一些外部数据源读取数据，并返回一个表示该源中数据记录的 `PCollection` 元素。
 
-每个数据源适配器都有一个 `Read` 变换;要读取，您必须将该变换应用于 `Pipeline` 对象本身。例如，`TextIO.Read`，`io.TextFileSource` 从外部文本文件读取并返回元素类型为 `String` 的 `PCollection`，每个 `String` 表示文本文件中的一行。 下面是将`TextIO.Read`，`io.TextFileSource` 应用于管道以创建 `PCollection` 的方法：
+每个数据源适配器都有一个 `Read` 变换;要读取，你必须将该变换应用于 `Pipeline` 对象本身。例如，`TextIO.Read`，`io.TextFileSource` 从外部文本文件读取并返回元素类型为 `String` 的 `PCollection`，每个 `String` 表示文本文件中的一行。 下面是将`TextIO.Read`，`io.TextFileSource` 应用于管道以创建 `PCollection` 的方法：
 
 ```java
 public static void main(String[] args) {
@@ -245,7 +245,7 @@ lines := textio.Read(s, "gs://some/inputData.txt")
 #### 3.1.2. 从内存数据中创建PCollection {#creating-pcollection-in-memory}
 
 
-要从内存中的Java `Collection` 中创建一个 `PCollection`，请使用Beam提供的 `Create` 转换。与数据适配器的 `Read` 非常相似，您可以直接将 `Create` 应用于 `Pipeline` 对象本身。
+要从内存中的Java `Collection` 中创建一个 `PCollection`，请使用Beam提供的 `Create` 转换。与数据适配器的 `Read` 非常相似，你可以直接将 `Create` 应用于 `Pipeline` 对象本身。
 
 作为参数，`Create` 接受Java `Collection` 和一个 `Coder` 对象。`Coder` 指定了如何[编码](#element-type) `Collection` 中的元素。
 
@@ -302,9 +302,9 @@ with beam.Pipeline(options=pipeline_options) as p:
 
 一个 `PCollection` 是一个大的、不可变的元素“袋”。一个 `PCollection` 可以包含多少个元素数量上没有上限;  任何给定的 `PCollection` 都可能适合存储在单个机器上的内存中，或者它可能代表由持久数据存储支持的非常大的分布式数据集。
 
-一个 `PCollection` 的大小可以是**有界的**，也可以是**无界的**。 一个**有界**的 `PCollection` 表示已知固定大小的数据集，而**无界** `PCollection` 表示无限大小的数据集。一个 `PCollection` 是有界的还是无界的取决于它所表示的数据集的源。. 从批处理数据源（例如文件或数据库）读取数据会创建一个有界 `PCollection`。  从流式传输或不断更新的数据源（如发布/订阅或Kafka）中读取，会创建一个无界的 `PCollection`（除非您明确告诉它不要这样做）。
+一个 `PCollection` 的大小可以是**有界的**，也可以是**无界的**。 一个**有界**的 `PCollection` 表示已知固定大小的数据集，而**无界** `PCollection` 表示无限大小的数据集。一个 `PCollection` 是有界的还是无界的取决于它所表示的数据集的源。. 从批处理数据源（例如文件或数据库）读取数据会创建一个有界 `PCollection`。  从流式传输或不断更新的数据源（如发布/订阅或Kafka）中读取，会创建一个无界的 `PCollection`（除非你明确告诉它不要这样做）。
 
-您的 `PCollection` 的有界（或无界）性质会影响Beam处理数据的方式。可以使用批处理作业处理一个有界 `PCollection`，批处理作业可以一次读取整个数据集，并在有限长度的作业中执行处理。必须使用连续运行的流式作业处理无界 `PCollection` ，因为在任何时候都不能对整个集合进行处理。
+你的 `PCollection` 的有界（或无界）性质会影响Beam处理数据的方式。可以使用批处理作业处理一个有界 `PCollection`，批处理作业可以一次读取整个数据集，并在有限长度的作业中执行处理。必须使用连续运行的流式作业处理无界 `PCollection` ，因为在任何时候都不能对整个集合进行处理。
 
 Beam使用[窗口](#windowing)将一个不断更新的无界 `PCollection` 划分为有限大小的逻辑窗口。这些逻辑窗口由与数据元素相关联的某些特征确定，例如**时间戳**。聚合转换（例如 `GroupByKey` 和 `Combine` ）在每个窗口的基础上工作 —当生成数据集时，他们将每个 `PCollection` 作为这些有限窗口的连续处理。
 
@@ -315,16 +315,16 @@ Beam使用[窗口](#windowing)将一个不断更新的无界 `PCollection` 划�
 
 > **注意**: 为固定数据集创建有界 `PCollection` 的源也会自动分配时间戳，但最常见的行为是为每个元素分配相同的时间戳（`Long.MIN_VALUE`）。
 
-时间戳对于一个包含具有固有时间概念的元素的 `PCollection` 非常有用。如果您的管道正在读取事件流（如Tweets或其他社交媒体消息），那么每个元素可能会使用事件发布的时间作为元素时间戳。
+时间戳对于一个包含具有固有时间概念的元素的 `PCollection` 非常有用。如果你的管道正在读取事件流（如Tweets或其他社交媒体消息），那么每个元素可能会使用事件发布的时间作为元素时间戳。
 
-如果数据源不为您执行此操作，您可以手动将时间戳分配给一个 `PCollection` 的元素。 如果元素有一个固有的时间戳，则您希望这样做，但时间戳位于元素本身的结构中（例如服务器日志条目中的“time”字段）的某个位置。Beam具有将一个 `PCollection` 作为输入和输出的[变换](#transforms)，该转换与附加了时间戳的 `PCollection` 相同; 有关如何执行此操作的详细信息，请参阅[添加时间戳](#adding-timestamps-to-a-pcollections-elements)。
+如果数据源不为你执行此操作，你可以手动将时间戳分配给一个 `PCollection` 的元素。 如果元素有一个固有的时间戳，则你希望这样做，但时间戳位于元素本身的结构中（例如服务器日志条目中的“time”字段）的某个位置。Beam具有将一个 `PCollection` 作为输入和输出的[变换](#transforms)，该转换与附加了时间戳的 `PCollection` 相同; 有关如何执行此操作的详细信息，请参阅[添加时间戳](#adding-timestamps-to-a-pcollections-elements)。
 
 ## 4. 变换 {#transforms}
 
-变换是您管道中的操作，并提供一个通用的处理框架。  您以函数对象的形式提供处理逻辑（通俗地称为“用户代码”），并且您的用户代码应用于输入 `PCollection`（或多个 `PCollection` ）的每个元素。
-根据您选择的管道运行程序和后端，集群中的许多不同工作者可以并行执行用户代码的实例。在每个工作者上运行的用户代码生成输出元素，这些元素最终被添加到变换产生的最终输出 `PCollection` 中。
+变换是你管道中的操作，并提供一个通用的处理框架。  你以函数对象的形式提供处理逻辑（通俗地称为“用户代码”），并且你的用户代码应用于输入 `PCollection`（或多个 `PCollection` ）的每个元素。
+根据你选择的管道运行程序和后端，集群中的许多不同工作者可以并行执行用户代码的实例。在每个工作者上运行的用户代码生成输出元素，这些元素最终被添加到变换产生的最终输出 `PCollection` 中。
 
-Beam SDK包含许多不同的变换，您可以将这些变换应用于管道的 `PCollection`。 这些变换包括通用核心变换，例如[ParDo](#pardo)或[Combine](#combine)。 SDK中还包含预先编写的[组合变换](#composite-transforms)，它们以一种有用的处理模式组合一个或多个核心变换，例如计算或组合集合中的元素。 您还可以定义自己更复杂的组合变换，以适应管道的确切用例。
+Beam SDK包含许多不同的变换，你可以将这些变换应用于管道的 `PCollection`。 这些变换包括通用核心变换，例如[ParDo](#pardo)或[Combine](#combine)。 SDK中还包含预先编写的[组合变换](#composite-transforms)，它们以一种有用的处理模式组合一个或多个核心变换，例如计算或组合集合中的元素。 你还可以定义自己更复杂的组合变换，以适应管道的确切用例。
 
 ### 4.1. 应用变换 {#applying-transforms}
 
@@ -337,9 +337,9 @@ Beam SDK包含许多不同的变换，您可以将这些变换应用于管道的
 [Output PCollection] = [Input PCollection] | [Transform]
 ```
 
-因为Beam对 `PCollection` 使用了一个通用的 `apply` 方法，所以您既可以按顺序链接变换，也可以应用包含嵌套在其中的其他变换的变换（在Beam SDK中称为[组合变换](#composite-transforms)）。
+因为Beam对 `PCollection` 使用了一个通用的 `apply` 方法，所以你既可以按顺序链接变换，也可以应用包含嵌套在其中的其他变换的变换（在Beam SDK中称为[组合变换](#composite-transforms)）。
 
-您如何应用您管道的转换决定了您管道的结构。思考您管道的最佳方法是将其看作一个有向无环图，其中节点是 `PCollection`，边是变换。例如，您可以链接变换来创建一个顺序的管道，如下所示:
+你如何应用你管道的转换决定了你管道的结构。思考你管道的最佳方法是将其看作一个有向无环图，其中节点是 `PCollection`，边是变换。例如，你可以链接变换来创建一个顺序的管道，如下所示:
 
 ```java
 [Final Output PCollection] = [Initial Input PCollection].apply([First Transform])
@@ -357,7 +357,7 @@ Beam SDK包含许多不同的变换，您可以将这些变换应用于管道的
 
 *图：具有三个顺序变换的线性管道.*
 
-但是，请注意，转换*不会消耗或以其他方式更改*输入集合 - 请记住，一个 `PCollection` 根据定义是不可变的。 这意味着您可以将多个变换应用于同一个输入 `PCollection` 来创建分支管道，如下所示： 
+但是，请注意，转换*不会消耗或以其他方式更改*输入集合 - 请记住，一个 `PCollection` 根据定义是不可变的。 这意味着你可以将多个变换应用于同一个输入 `PCollection` 来创建分支管道，如下所示： 
 
 ```java
 [PCollection of database table rows] = [Database Table Reader].apply([Read Transform])
@@ -376,7 +376,7 @@ Beam SDK包含许多不同的变换，您可以将这些变换应用于管道的
 
 *图：一个分支管道。 将两个转换应用于数据库表行的单个PCollection。*
 
-您还可以构建您自己的[组合转换](#composite-transforms)，将多个子步骤嵌套在一个更大的转换中。组合转换对于构建可重用的简单步骤序列特别有用，这些步骤可以在许多不同的地方使用。
+你还可以构建你自己的[组合转换](#composite-transforms)，将多个子步骤嵌套在一个更大的转换中。组合转换对于构建可重用的简单步骤序列特别有用，这些步骤可以在许多不同的地方使用。
 
 ### 4.2. 核心Beam变换 {#core-beam-transforms}
 
@@ -392,24 +392,24 @@ processing paradigm:
 
 #### 4.2.1. ParDo {#pardo}
 
-`ParDo` 是一种用于通用并行处理的Beam变换。`ParDo` 处理范例类似于Map/Shuffle/Reduce风格算法的"Map"阶段：一个 `ParDo` 变换考虑输入 `PCollection` 中的每个元素，对该元素执行一些处理功能（您的用户代码），并发出零 ，一个或多个元素到输出 `PCollection`。
+`ParDo` 是一种用于通用并行处理的Beam变换。`ParDo` 处理范例类似于Map/Shuffle/Reduce风格算法的"Map"阶段：一个 `ParDo` 变换考虑输入 `PCollection` 中的每个元素，对该元素执行一些处理功能（你的用户代码），并发出零 ，一个或多个元素到输出 `PCollection`。
 
 `ParDo` 对于各种常见的数据处理操作非常有用，包括：
 
-* **过滤数据集。** 您可以使用 `ParDo` 考虑  `PCollection` 中的每个元素，并将该元素输出到一个新集合，或将它丢弃。
-* **格式化或类型转换数据集中的每个元素。** 如果您的输入 `PCollection` 包含的元素类型或格式与您想要的不同，则可以使用 `ParDo` 对每个元素执行转换，并将结果输出到一个新的 `PCollection`。
-* **提取数据集中每个元素的部分。** 例如，如果您有一个包含多个字段的 `PCollection` 记录， 则可以使用 `ParDo` 将要考虑的字段解析为一个新的 `PCollection`。
-* **对数据集中的每个元素执行计算。** 您可以使用 `ParDo` 对 `PCollection` 的每个元素或某些元素执行简单或复杂的计算，并将结果输出为新的 `PCollection`。
+* **过滤数据集。** 你可以使用 `ParDo` 考虑  `PCollection` 中的每个元素，并将该元素输出到一个新集合，或将它丢弃。
+* **格式化或类型转换数据集中的每个元素。** 如果你的输入 `PCollection` 包含的元素类型或格式与你想要的不同，则可以使用 `ParDo` 对每个元素执行转换，并将结果输出到一个新的 `PCollection`。
+* **提取数据集中每个元素的部分。** 例如，如果你有一个包含多个字段的 `PCollection` 记录， 则可以使用 `ParDo` 将要考虑的字段解析为一个新的 `PCollection`。
+* **对数据集中的每个元素执行计算。** 你可以使用 `ParDo` 对 `PCollection` 的每个元素或某些元素执行简单或复杂的计算，并将结果输出为新的 `PCollection`。
 
-在这些角色中，`ParDo` 是管道中常见的中间步骤。您可以使用它从一组原始输入记录中提取某些字段，或将原始输入转换为其他格式;您也可以使用 `ParDo` 将处理后的数据转换为适合输出的格式，如数据库表行或可打印字符串。
+在这些角色中，`ParDo` 是管道中常见的中间步骤。你可以使用它从一组原始输入记录中提取某些字段，或将原始输入转换为其他格式;你也可以使用 `ParDo` 将处理后的数据转换为适合输出的格式，如数据库表行或可打印字符串。
 
-当您应用一个 `ParDo` 转换时，您需要以 `DoFn` 对象的形式提供用户代码。 `DoFn` 是一个Beam SDK类，它定义了分布式处理函数。
+当你应用一个 `ParDo` 转换时，你需要以 `DoFn` 对象的形式提供用户代码。 `DoFn` 是一个Beam SDK类，它定义了分布式处理函数。
 
->当您创建 `DoFn` 的子类时, 请注意，您的子类应该遵守[为Beam变换编写用户代码的要求](#requirements-for-writing-user-code-for-beam-transforms).
+>当你创建 `DoFn` 的子类时, 请注意，你的子类应该遵守[为Beam变换编写用户代码的要求](#requirements-for-writing-user-code-for-beam-transforms).
 
 ##### 4.2.1.1. 应用ParDo {#applying-pardo}
 
-与所有Beam变换一样，您通过在输入 `PCollection` 上调用 `apply` 方法来应用 `ParDo`，
+与所有Beam变换一样，你通过在输入 `PCollection` 上调用 `apply` 方法来应用 `ParDo`，
 并将 `ParDo` 作为参数传递，如下面的示例代码所示:
 
 ```java
@@ -452,21 +452,21 @@ wordLengths := beam.ParDo(s, computeWordLengthFn, words)
 在示例中，我们的输入 `PCollection` 包含 `String` 值。 我们应用一个 `ParDo` 变换，它指定一个函数（`ComputeWordLengthFn`）来计算每个字符串的长度，并将结果输出到一个存储每个单词长度的新 `Integer` 值 `PCollection`。 
 ##### 4.2.1.2. 创建一个DoFn
 
-传递给 `ParDo` 的 `DoFn` 对象包含应用于输入集合中的元素的处理逻辑。您将编写的最重要的代码片段通常是这些 `DoFn`——它们定义了管道的确切数据处理任务。.
+传递给 `ParDo` 的 `DoFn` 对象包含应用于输入集合中的元素的处理逻辑。你将编写的最重要的代码片段通常是这些 `DoFn`——它们定义了管道的确切数据处理任务。.
 
-> **注意:** 当您创建您的 `DoFn` 时，请注意[为Beam变换编写用户代码的要求](#requirements-for-writing-user-code-for-beam-transforms)，并确保您的代码遵循这些要求。
+> **注意:** 当你创建你的 `DoFn` 时，请注意[为Beam变换编写用户代码的要求](#requirements-for-writing-user-code-for-beam-transforms)，并确保你的代码遵循这些要求。
 
 
-一个 `DoFn` 每次处理输入 `PCollection` 中的一个元素。 当您在创建 `DoFn` 的子类时，您需要提供与输入和输出元素的类型匹配的类型参数。如果您的 `DoFn` 处理传入的 `String` 元素并为输出集合生成 `Integer` 元素（就像我们之前的示例`ComputeWordLengthFn`），您的类声明将如下所示：
+一个 `DoFn` 每次处理输入 `PCollection` 中的一个元素。 当你在创建 `DoFn` 的子类时，你需要提供与输入和输出元素的类型匹配的类型参数。如果你的 `DoFn` 处理传入的 `String` 元素并为输出集合生成 `Integer` 元素（就像我们之前的示例`ComputeWordLengthFn`），你的类声明将如下所示：
 
 ```java
 static class ComputeWordLengthFn extends DoFn<String, Integer> { ... }
 ```
 
-在您的 `DoFn` 子类中, 您将编写一个带有 `@ProcessElement` 注解的方法，在这个方法中，您可以提供实际的处理逻辑。您不需要手动从输入集合中提取元素;Beam SDKs会为您处理。您的 `@ProcessElement` 方法应该接受一个带有 `@Element` 标记的参数，该参数将使用input元素填充。为了输出元素，该方法还可以采用 `OutputReceiver`类型的参数，该参数提供用于发出元素的方法。参数类型必须匹配 `DoFn` 的输入和输出类型，否则框架将引发错误。 注意：@Llement和OutputReceiver是在Beam 2.5.0中引入的;如果使用早期版本的Beam，则应使用ProcessContext参数。
+在你的 `DoFn` 子类中, 你将编写一个带有 `@ProcessElement` 注解的方法，在这个方法中，你可以提供实际的处理逻辑。你不需要手动从输入集合中提取元素;Beam SDKs会为你处理。你的 `@ProcessElement` 方法应该接受一个带有 `@Element` 标记的参数，该参数将使用input元素填充。为了输出元素，该方法还可以采用 `OutputReceiver`类型的参数，该参数提供用于发出元素的方法。参数类型必须匹配 `DoFn` 的输入和输出类型，否则框架将引发错误。 注意：@Llement和OutputReceiver是在Beam 2.5.0中引入的;如果使用早期版本的Beam，则应使用ProcessContext参数。
 
 
-在您的 `DoFn` 子类中，您将编写一个方法 `process`，您可以在其中提供实际的处理逻辑。 您不需要从输入集合中手动提取元素; Beam SDKs会为您处理。 您的 `process` 方法应该接受 `element` 类型的对象。 这是输入元素，并使用 `yield` 或 `return` 语句在 `process` 方法内部发出输出。
+在你的 `DoFn` 子类中，你将编写一个方法 `process`，你可以在其中提供实际的处理逻辑。 你不需要从输入集合中手动提取元素; Beam SDKs会为你处理。 你的 `process` 方法应该接受 `element` 类型的对象。 这是输入元素，并使用 `yield` 或 `return` 语句在 `process` 方法内部发出输出。
 
 ```java
 static class ComputeWordLengthFn extends DoFn<String, Integer> {
@@ -485,11 +485,11 @@ class ComputeWordLengthFn(beam.DoFn):
 
 > **注意：** 如果输入 `PCollection`中的元素是键/值对，则可以分别使用 `element.getKey()` 或 `element.getValue()` 来访问键或值。
 
-通常会调用给定的 `DoFn` 实例一次或多次来处理某些任意元素束。但是，Beam不保证确切的调用次数;可以在给定的工作节点上多次调用它以解决故障和重试。因此，您可以在处理方法的多个调用之间缓存信息，但是如果这样做，请确保实现**不依赖于调用的次数**。
+通常会调用给定的 `DoFn` 实例一次或多次来处理某些任意元素束。但是，Beam不保证确切的调用次数;可以在给定的工作节点上多次调用它以解决故障和重试。因此，你可以在处理方法的多个调用之间缓存信息，但是如果这样做，请确保实现**不依赖于调用的次数**。
 
-在您的处理方法中，您还需要满足一些不变性要求，以确保Beam和处理后端可以安全地序列化并缓存管道中的值。 您的方法应符合以下要求：
+在你的处理方法中，你还需要满足一些不变性要求，以确保Beam和处理后端可以安全地序列化并缓存管道中的值。 你的方法应符合以下要求：
 
-* 您不应以任何方式修改 `@Element` 注解或 `ProcessContext.sideInput()` (输入集合中的传入元素)返回的元素.
+* 你不应以任何方式修改 `@Element` 注解或 `ProcessContext.sideInput()` (输入集合中的传入元素)返回的元素.
 * 一旦使用 `OutputReceiver.output()` 输出了一个值，就不应该以任何方式修改该值。
 
 ##### 4.2.1.3. 轻量级DoFns和其他抽象 {#lightweight-dofns}
@@ -530,7 +530,7 @@ lengths := beam.ParDo(s, func (word string) int {
 }, words)
 ```
 
-如果您的 `ParDo` 执行输入元素与输出元素的一对一映射 - 也就是说，对于每个输入元素，它应用一个*恰好生成一个*输出元素的函数，则可以使用更高级别的 `MapElements` `Map` 变换。 为了更加简洁， `MapElements` 可以接受匿名的Java 8 lambda函数。
+如果你的 `ParDo` 执行输入元素与输出元素的一对一映射 - 也就是说，对于每个输入元素，它应用一个*恰好生成一个*输出元素的函数，则可以使用更高级别的 `MapElements` `Map` 变换。 为了更加简洁， `MapElements` 可以接受匿名的Java 8 lambda函数。
 
 这是使用 `MapElements` `Map` 的前一个示例：
 
@@ -552,13 +552,13 @@ words = ...
 # 将结果保存为PCollection wordLengths。
 word_lengths = words | beam.Map(len)
 ```
-> **注意：** 您可以将Java 8 lambda函数与其他几个Beam变换一起使用，包括 `Filter`, `FlatMapElements`, 和 `Partition`。
+> **注意：** 你可以将Java 8 lambda函数与其他几个Beam变换一起使用，包括 `Filter`, `FlatMapElements`, 和 `Partition`。
 
 #### 4.2.2. GroupByKey {#groupbykey}
 
-`GroupByKey`是用于处理键/值对集合的Beam变换。 这是一个并行归约操作，类似于Map/Shuffle/Reduce风格算法的Shuffle阶段。`GroupByKey` 的输入是表示*多映射*的键/值对的集合，其中集合包含多个具有相同键但不具有相同值的对。给定这样一个集合，您可以使用   `GroupByKey`收集与每个惟一键关联的所有值。
+`GroupByKey`是用于处理键/值对集合的Beam变换。 这是一个并行归约操作，类似于Map/Shuffle/Reduce风格算法的Shuffle阶段。`GroupByKey` 的输入是表示*多映射*的键/值对的集合，其中集合包含多个具有相同键但不具有相同值的对。给定这样一个集合，你可以使用   `GroupByKey`收集与每个惟一键关联的所有值。
 
-`GroupByKey` 是一种聚合某些有共同点的数据的好方法。例如，如果您有一个存储客户订单记录的集合，您可能希望将来自相同邮政编码的所有订单组合在一起（其中键/值对的“键”是邮政编码字段，并且“ 值“是记录的剩余部分）。
+`GroupByKey` 是一种聚合某些有共同点的数据的好方法。例如，如果你有一个存储客户订单记录的集合，你可能希望将来自相同邮政编码的所有订单组合在一起（其中键/值对的“键”是邮政编码字段，并且“ 值“是记录的剩余部分）。
 
 让我们用一个简单的例子来研究 `GroupByKey` 的机制，其中我们的数据集由文本文件中的单词和它们出现的行号组成。 我们希望将共享同一个单词（键）的所有行号（值）组合在一起，让我们看到文本中某个特定单词出现的所有位置。
 
@@ -592,24 +592,24 @@ tree, [2]
 
 ##### 4.2.2.1 GroupByKey和无界PCollections {#groupbykey-and-unbounded-pcollections}
 
-如果您使用无界 `PCollection`，则必须使用[非全局窗口](#setting-your-pcollections-windowing-function)或[聚合触发器](#triggers)才能执行 `GroupByKey` 或[CoGroupByKey](#cogroupbykey)。 这是因为有界 `GroupByKey` 或 `CoGroupByKey` 必须等待收集某个键的所有数据，但是对于无界集合，数据是无限的。窗口和/或触发器允许对无界数据流中的逻辑、有限的数据束进行分组操作。
+如果你使用无界 `PCollection`，则必须使用[非全局窗口](#setting-your-pcollections-windowing-function)或[聚合触发器](#triggers)才能执行 `GroupByKey` 或[CoGroupByKey](#cogroupbykey)。 这是因为有界 `GroupByKey` 或 `CoGroupByKey` 必须等待收集某个键的所有数据，但是对于无界集合，数据是无限的。窗口和/或触发器允许对无界数据流中的逻辑、有限的数据束进行分组操作。
 
-如果您将 `GroupByKey` 或 `CoGroupByKey` 应用于一组无界 `PCollection` ，而没有为每个集合设置非全局窗口策略，触发策略或同时设置这两种策略，则Beam会在管道构建时生成IllegalStateException错误。
+如果你将 `GroupByKey` 或 `CoGroupByKey` 应用于一组无界 `PCollection` ，而没有为每个集合设置非全局窗口策略，触发策略或同时设置这两种策略，则Beam会在管道构建时生成IllegalStateException错误。
 
-使用 `GroupByKey` 或 `CoGroupByKey` 对应用了[窗口策略](#windowing)的 `PCollection` 进行分组时，要分组的所有 `PCollection` *必须使用相同的窗口策略*和窗口大小。 例如，您要合并的所有集合必须使用（假设）相同的5分钟固定窗口，或每30秒开始的一次4分钟滑动窗口。
+使用 `GroupByKey` 或 `CoGroupByKey` 对应用了[窗口策略](#windowing)的 `PCollection` 进行分组时，要分组的所有 `PCollection` *必须使用相同的窗口策略*和窗口大小。 例如，你要合并的所有集合必须使用（假设）相同的5分钟固定窗口，或每30秒开始的一次4分钟滑动窗口。
 
-如果您的管道尝试使用 `GroupByKey` 或 `CoGroupByKey` 将 `PCollection`与不兼容的窗口合并，则Beam会在管道构建时生成IllegalStateException错误。
+如果你的管道尝试使用 `GroupByKey` 或 `CoGroupByKey` 将 `PCollection`与不兼容的窗口合并，则Beam会在管道构建时生成IllegalStateException错误。
 
 #### 4.2.3. CoGroupByKey {#cogroupbykey}
 
-`CoGroupByKey` 执行具有相同键类型的两个或多个键/值 `PCollection` 的关系连接。[设计您的管道](https://beam.apache.org/documentation/pipelines/design-your-pipeline/#multiple-sources)显示了一个使用连接的示例管道。
+`CoGroupByKey` 执行具有相同键类型的两个或多个键/值 `PCollection` 的关系连接。[设计你的管道](https://beam.apache.org/documentation/pipelines/design-your-pipeline/#multiple-sources)显示了一个使用连接的示例管道。
 
-如果您有多个数据集来提供有关相关事物的信息，请考虑使用`CoGroupByKey`。例如，假设您有两个不同的用户数据文件：一个文件有名称和电子邮件地址; 另一个文件有姓名和电话号码。 您可以使用用户名作为公共键，并将其他数据作为关联值，来连接这两个数据集。 在连接之后，您有一个数据集，其中包含与每个名称关联的所有信息（电子邮件地址和电话号码）。
+如果你有多个数据集来提供有关相关事物的信息，请考虑使用`CoGroupByKey`。例如，假设你有两个不同的用户数据文件：一个文件有名称和电子邮件地址; 另一个文件有姓名和电话号码。 你可以使用用户名作为公共键，并将其他数据作为关联值，来连接这两个数据集。 在连接之后，你有一个数据集，其中包含与每个名称关联的所有信息（电子邮件地址和电话号码）。
 
-如果您使用的是无界 `PCollection`，则必须使用[非全局窗口](#setting-your-pcollections-windowing-function)或[聚合触发器](#triggers)才能执行一个 `CoGroupByKey`。有关详细信息，请参阅[GroupByKey和无界PCollections](#groupbykey-and-unbounded-pcollections)。
+如果你使用的是无界 `PCollection`，则必须使用[非全局窗口](#setting-your-pcollections-windowing-function)或[聚合触发器](#triggers)才能执行一个 `CoGroupByKey`。有关详细信息，请参阅[GroupByKey和无界PCollections](#groupbykey-and-unbounded-pcollections)。
 
 
-在Java的Beam SDK中，`CoGroupByKey` 接受一个以 `PCollection` 为键的元组 (`PCollection<KV<K, V>>`)作为输入。为了类型安全，SDK要求您将每个 `PCollection` 作为 `KeyedPCollectionTuple` 的一部分传递。您必须为要传递给 `CoGroupByKey` 的 `KeyedPCollectionTuple` 中的每个输入 `PCollection` 声明一个  `TupleTag`。作为输出，`CoGroupByKey` 返回一个 `PCollection<KV<K, CoGbkResult>>`，它根据所有输入 `PCollection` 的公共键对值进行分组。 每个键（所有类型 `K`）将具有不同的 `CoGbkResult`，这是从 `TupleTag<T>` 到 `Iterable<T>`的映射。您可以使用一个随初始集合提供的 `TupleTag` 来访问 `CoGbkResult` 对象中的特定集合。
+在Java的Beam SDK中，`CoGroupByKey` 接受一个以 `PCollection` 为键的元组 (`PCollection<KV<K, V>>`)作为输入。为了类型安全，SDK要求你将每个 `PCollection` 作为 `KeyedPCollectionTuple` 的一部分传递。你必须为要传递给 `CoGroupByKey` 的 `KeyedPCollectionTuple` 中的每个输入 `PCollection` 声明一个  `TupleTag`。作为输出，`CoGroupByKey` 返回一个 `PCollection<KV<K, CoGbkResult>>`，它根据所有输入 `PCollection` 的公共键对值进行分组。 每个键（所有类型 `K`）将具有不同的 `CoGbkResult`，这是从 `TupleTag<T>` 到 `Iterable<T>`的映射。你可以使用一个随初始集合提供的 `TupleTag` 来访问 `CoGbkResult` 对象中的特定集合。
 
 在Python的Beam SDK中， `CoGroupByKey` 接受一个以 `PCollection` 为键的字典作为输入。作为输出，`CoGroupByKey` 创建单个输出 `PCollection`，这个输出的 `PCollection` 为输入 `PCollection` 中的每个键包含了一个键/值元组。每个键的值是一个字典，它将每个标记映射到对应 `PCollection` 中键下值的一个迭代。
 
@@ -761,9 +761,9 @@ formatted_results = [
 [`Combine`](https://beam.apache.org/releases/javadoc/2.13.0/index.html?org/apache/beam/sdk/transforms/Combine.html) [`Combine`](https://github.com/apache/beam/blob/master/sdks/python/apache_beam/transforms/core.py)
 是一种Beam变换，用于组合数据中的元素或值集合。`Combine` 有对整个 `PCollection` 起作用的变体，还有一些变体组合了 `PCollection` 键/值对中每个键的值。
 
-当您应用 `Combine` 变换时，必须提供包含组合元素或值的逻辑的函数。 组合函数应该是可交换的和关联的，因为对于给定键的所有值，函数不一定都只调用一次。 由于输入数据（包括值集合）可以分布在多个工作者之间，所以可以多次调用组合函数来对值集合的子集执行部分组合。 Beam SDK还为常见的数字组合操作（如sum，min和max）提供了一些预构建的组合函数。
+当你应用 `Combine` 变换时，必须提供包含组合元素或值的逻辑的函数。 组合函数应该是可交换的和关联的，因为对于给定键的所有值，函数不一定都只调用一次。 由于输入数据（包括值集合）可以分布在多个工作者之间，所以可以多次调用组合函数来对值集合的子集执行部分组合。 Beam SDK还为常见的数字组合操作（如sum，min和max）提供了一些预构建的组合函数。
 
-简单的组合操作（例如求和）通常可以作为一个简单的函数来实现。更复杂的组合操作可能需要您创建 `CombineFn`  的子类，它具有与输入/输出类型不同的累积类型。
+简单的组合操作（例如求和）通常可以作为一个简单的函数来实现。更复杂的组合操作可能需要你创建 `CombineFn`  的子类，它具有与输入/输出类型不同的累积类型。
 
 ##### 4.2.4.1. 使用简单函数的简单组合 {#simple-combines}
 
@@ -795,7 +795,7 @@ large_sum = pc | beam.CombineGlobally(bounded_sum, bound=5000)  # [1111]
 
 ##### 4.2.4.2. 使用CombineFn的高级组合 {#advanced-combines}
 
-对于更复杂的组合函数，您可以定义 `CombineFn` 的子类。 如果组合函数需要更复杂的累加器，必须执行额外的预处理或后处理，可能会更改输出类型或者把键考虑在内，则您应该使用`CombineFn`。
+对于更复杂的组合函数，你可以定义 `CombineFn` 的子类。 如果组合函数需要更复杂的累加器，必须执行额外的预处理或后处理，可能会更改输出类型或者把键考虑在内，则你应该使用`CombineFn`。
 
 一般的组合操作包括四个操作。 在创建 `CombineFn` 的子类时，必须通过重写相应的方法来提供四个操作：
 
@@ -861,7 +861,7 @@ class AverageFn(beam.CombineFn):
     return sum / count if count else float('NaN')
 ```
 
-如果你要组合一个键值对的 `PCollection`，则每个[键组合](#combining-values-in-a-keyed-pcollection)通常就足够了。如果您需要根据键更改组合策略（例如，某些用户为MIN，其他用户为MAX），则可以定义 `KeyedCombineFn` 来访问组合策略中的键。
+如果你要组合一个键值对的 `PCollection`，则每个[键组合](#combining-values-in-a-keyed-pcollection)通常就足够了。如果你需要根据键更改组合策略（例如，某些用户为MIN，其他用户为MAX），则可以定义 `KeyedCombineFn` 来访问组合策略中的键。
 
 ##### 4.2.4.3. 将PCollection组合为单个值{#combining-pcollection}
 
@@ -882,9 +882,9 @@ average = pc | beam.CombineGlobally(AverageFn())
 
 ##### 4.2.4.4. 组合和全局窗口{#combine-global-windowing}
 
-如果您的输入 `PCollection` 使用默认的全局窗口，则默认行为是返回包含一个项的 `PCollection`。 该项的值来自您在应用 `Combine` 时指定的组合函数中的累加器。 例如，Beam提供的sum组合函数返回一个零值（一个空输入的求和），而min组合函数返回最大值或无穷大值。
+如果你的输入 `PCollection` 使用默认的全局窗口，则默认行为是返回包含一个项的 `PCollection`。 该项的值来自你在应用 `Combine` 时指定的组合函数中的累加器。 例如，Beam提供的sum组合函数返回一个零值（一个空输入的求和），而min组合函数返回最大值或无穷大值。
 
-要使 `Combine` 在输入为空时返回空的 `PCollection`，请在您应用的 `Combine` 变换时指定 `.withoutDefaults` ，如下面的代码示例所示：
+要使 `Combine` 在输入为空时返回空的 `PCollection`，请在你应用的 `Combine` 变换时指定 `.withoutDefaults` ，如下面的代码示例所示：
 
 ```java
 PCollection<Integer> pc = ...;
@@ -898,9 +898,9 @@ sum = pc | beam.CombineGlobally(sum).without_defaults()
 
 ##### 4.2.4.5. 组合和非全局窗口 {#combine-non-global-windowing}
 
-如果您的 `PCollection` 使用任何非全局窗口函数，则Beam不会提供默认行为。 应用 `Combine` 时，您必须指定以下选项之一：
+如果你的 `PCollection` 使用任何非全局窗口函数，则Beam不会提供默认行为。 应用 `Combine` 时，你必须指定以下选项之一：
 * 指定 `.withoutDefaults`，其中在输入 `PCollection` 中为空的窗口，将在输出集合中同样为空。
-* 指定 `.asSingletonView`，其中输出立即转换为 `PCollectionView`，当用作侧输入时，它将为每个空窗口提供默认值。 如果您管道的 `Combine` 结果在后面的管道中用作侧输入时，才需要使用这个选项。
+* 指定 `.asSingletonView`，其中输出立即转换为 `PCollectionView`，当用作侧输入时，它将为每个空窗口提供默认值。 如果你管道的 `Combine` 结果在后面的管道中用作侧输入时，才需要使用这个选项。
 
 ##### 4.2.4.6.在一个键PCollection中组合值 {#combining-values-in-a-keyed-pcollection}
 
@@ -914,7 +914,7 @@ sum = pc | beam.CombineGlobally(sum).without_defaults()
   ...
 ```
 
-在上面的 `PCollection` 中，每个元素都有一个字符串键（例如，“cat”）和一个可迭代的整数值（在第一个元素中，包含[1,5,9]）。 如果我们管道的下一个处理步骤组合了这些值（而不是单独考虑它们），您可以组合可迭代的整数来创建一个单个的，合并的值，以便与每个键配对。这种之后合并值集合 `GroupByKey` 模式，相当于Beam的Combine PerKey变换。 您提供给Combine PerKey的组合函数必须是关联归约函数或 `CombineFn` 的一个子类。
+在上面的 `PCollection` 中，每个元素都有一个字符串键（例如，“cat”）和一个可迭代的整数值（在第一个元素中，包含[1,5,9]）。 如果我们管道的下一个处理步骤组合了这些值（而不是单独考虑它们），你可以组合可迭代的整数来创建一个单个的，合并的值，以便与每个键配对。这种之后合并值集合 `GroupByKey` 模式，相当于Beam的Combine PerKey变换。 你提供给Combine PerKey的组合函数必须是关联归约函数或 `CombineFn` 的一个子类。
 
 ```java
 // PCollection按键分组，与每个键关联的Double值组合成一个Double。
@@ -965,19 +965,19 @@ merged = (
 
 ##### 4.2.5.1. 在合并集合中的数据编码 {#data-encoding-merged-collections}
 
-默认情况下，输出 `PCollection` 的编码器与输入  `PCollectionList` 中第一个 `PCollection`的编码器相同。 但是，输入的 `PCollection` 对象可以使用不同的编码器，只要它们都包含您选择的语言中相同的数据类型即可。
+默认情况下，输出 `PCollection` 的编码器与输入  `PCollectionList` 中第一个 `PCollection`的编码器相同。 但是，输入的 `PCollection` 对象可以使用不同的编码器，只要它们都包含你选择的语言中相同的数据类型即可。
 
 ##### 4.2.5.2. 合并窗口集合 {#merging-windowed-collections}
 
-当使用 `Flatten` 合并应用了窗口策略的 `PCollection` 对象时，要合并的所有 `PCollection` 对象必须使用兼容的窗口策略和窗口大小。 例如，您正在合并的所有集合必须全部使用（假设）相同的5分钟固定窗口或每30秒开始一次的4分钟滑动窗口。
+当使用 `Flatten` 合并应用了窗口策略的 `PCollection` 对象时，要合并的所有 `PCollection` 对象必须使用兼容的窗口策略和窗口大小。 例如，你正在合并的所有集合必须全部使用（假设）相同的5分钟固定窗口或每30秒开始一次的4分钟滑动窗口。
 
-如果您的管道尝试使用 `Flatten` 将 `PCollection` 对象与不兼容的窗口合并，则在构建管道时，Beam会生成一个  `IllegalStateException` 错误。
+如果你的管道尝试使用 `Flatten` 将 `PCollection` 对象与不兼容的窗口合并，则在构建管道时，Beam会生成一个  `IllegalStateException` 错误。
 
 #### 4.2.6. 分区 {#partition}
 
 [`Partition`](https://beam.apache.org/releases/javadoc/2.13.0/index.html?org/apache/beam/sdk/transforms/Partition.html) [`Partition`](https://github.com/apache/beam/blob/master/sdks/python/apache_beam/transforms/core.py) 是存储相同数据类型的 `PCollection` 对象的Beam变换。`Partition` 将单个 `PCollection` 拆分为固定数量的较小集合。
 
-`Partition` 根据您提供的分区函数划分一个 `PCollection` 的元素。 分区函数包含确定如何将输入 `PCollection` 的元素拆分为每个结果分区 `PCollection` 的逻辑。 必须在图构建时确定分区数。 例如，您可以在运行时将分区数作为命令行选项传递（它之后将被用于构建管道图），但是您无法确定管道中间的分区数（例如，根据您管道图构建后计算的数据）。
+`Partition` 根据你提供的分区函数划分一个 `PCollection` 的元素。 分区函数包含确定如何将输入 `PCollection` 的元素拆分为每个结果分区 `PCollection` 的逻辑。 必须在图构建时确定分区数。 例如，你可以在运行时将分区数作为命令行选项传递（它之后将被用于构建管道图），但是你无法确定管道中间的分区数（例如，根据你管道图构建后计算的数据）。
 
 下面的示例将 `PCollection`划分为一个百分比组。
 
@@ -994,7 +994,7 @@ PCollectionList<Student> studentsByPercentile =
                  * numPartitions / 100;
         }}));
 
-// 您可以使用get方法从PCollectionList中提取每个分区，如下所示：
+// 你可以使用get方法从PCollectionList中提取每个分区，如下所示：
 PCollection<Student> fortiethPercentile = studentsByPercentile.get(4);
 ```
 ```py
@@ -1006,18 +1006,18 @@ def partition_fn(student, num_partitions):
 
 by_decile = students | beam.Partition(partition_fn, 10)
 
-# 您可以从PCollection对象的元组中提取每个分区，如下所示：
+# 你可以从PCollection对象的元组中提取每个分区，如下所示：
 fortieth_percentile = by_decile[4]
 ```
 
 ### 4.3. 为Beam变换编写用户代码的要求 {#requirements-for-writing-user-code-for-beam-transforms}
 
-当您为一个Beam变换构建用户代码时，应记住执行的分布式特性。 例如，可能有许多函数的副本在许多不同的机器上并行运行，这些副本可能独立运行，不与任何其他副本通信或共享状态。 根据您为你管道选择的管道运行器和处理后端，您的用户代码函数副本可能被重试或运行多次。 因此，您应该谨慎地在用户代码中包含状态依赖之类的内容。
+当你为一个Beam变换构建用户代码时，应记住执行的分布式特性。 例如，可能有许多函数的副本在许多不同的机器上并行运行，这些副本可能独立运行，不与任何其他副本通信或共享状态。 根据你为你管道选择的管道运行器和处理后端，你的用户代码函数副本可能被重试或运行多次。 因此，你应该谨慎地在用户代码中包含状态依赖之类的内容。
 
-通常，您的用户代码必须至少满足以下要求：
+通常，你的用户代码必须至少满足以下要求：
 
-* 您的函数对象必须是**可序列化的**。
-* 您的函数对象必须是**线程兼容**的，并且要注意Beam SDK不是线程安全的。
+* 你的函数对象必须是**可序列化的**。
+* 你的函数对象必须是**线程兼容**的，并且要注意Beam SDK不是线程安全的。
 
 此外，我们建议你让你的函数对象具有**幂等性**。非幂等函数由Beam支持，但当存在外部副作用时，需要额外的考虑来确保正确性。
 
@@ -1025,9 +1025,9 @@ fortieth_percentile = by_decile[4]
 
 #### 4.3.1. 可串行化 {#user-code-serializability}
 
-您为一个变换提供的任何函数对象都必须是**完全可序列化**的。 这是因为需要将函数的副本序列化并传输到处理集群中的远程工作程序。 用户代码的基类，如 `DoFn`，`CombineFn` 和 `WindowFn`，已实现 `Serializable`; 但是，您的子类不能添加任何不可序列化的成员。
+你为一个变换提供的任何函数对象都必须是**完全可序列化**的。 这是因为需要将函数的副本序列化并传输到处理集群中的远程工作程序。 用户代码的基类，如 `DoFn`，`CombineFn` 和 `WindowFn`，已实现 `Serializable`; 但是，你的子类不能添加任何不可序列化的成员。
 
-您应该记住的一些其他可串行化因素是：
+你应该记住的一些其他可串行化因素是：
 
 * 函数对象中的瞬态字段*不会*传输到工作者实例中，因为它们不会自动序列化。
 * 在序列化之前避免加载包含有大量数据的字段。
@@ -1037,62 +1037,43 @@ fortieth_percentile = by_decile[4]
 
 #### 4.3.2. 线程兼容 {#user-code-thread-compatibility}
 
-Your function object should be thread-compatible. Each instance of your function
-object is accessed by a single thread at a time on a worker instance, unless you
-explicitly create your own threads. Note, however, that **the Beam SDKs are not
-thread-safe**. If you create your own threads in your user code, you must
-provide your own synchronization. Note that static members in your function
-object are not passed to worker instances and that multiple instances of your
-function may be accessed from different threads.
+你的函数对象应该与线程兼容。 除非你明确地创建自己的线程，否则每个函数对象的实例都会在工作者实例上由单个线程访问一次。 但是，请注意，Beam SDKs不是线程安全的。 如果在用户代码中创建自己的线程，则必须提供自己的同步。 请注意，函数对象中的静态成员不会传递给工作者实例，而且可以从不同的线程访问函数的多个实例。
 
 #### 4.3.3. 幂等性 {#user-code-idempotence}
 
-It's recommended that you make your function object idempotent--that is, that it
-can be repeated or retried as often as necessary without causing unintended side
-effects. Non-idempotent functions are supported, however the Beam model provides
-no guarantees as to the number of times your user code might be invoked or retried;
-as such, keeping your function object idempotent keeps your pipeline's output
-deterministic, and your transforms' behavior more predictable and easier to debug.
+建议你使你的函数对象具有幂等性 - 也就是说，它可以根据需要重复或重试，而不会导致意外的副作用。 支持非幂等函数，但Beam模型不保证可以调用或重试用户代码的次数; 因此，保持函数对象的幂等性可以使管道输出具有确定性，并且你的变换行为更易于预测且更易于调试。
 
 ### 4.4. 侧输入 {#side-inputs}
 
-In addition to the main input `PCollection`, you can provide additional inputs
-to a `ParDo` transform in the form of side inputs. A side input is an additional
-input that your `DoFn` can access each time it processes an element in the input
-`PCollection`. When you specify a side input, you create a view of some other
-data that can be read from within the `ParDo` transform's `DoFn` while procesing
-each element.
+除了主输入 `PCollection` 之外，你还可以以侧输入的形式为一个 `ParDo` 变换提供额外的输入。 侧输入是一个额外输入，`DoFn` 每次处理输入 `PCollection` 中的一个元素时，都可以访问它。 当你指定一个侧输入时，你将创建一些其他数据的视图，这些数据可以在处理每个元素时从 `ParDo` 变换的  `DoFn` 中读取。
 
-Side inputs are useful if your `ParDo` needs to inject additional data when
-processing each element in the input `PCollection`, but the additional data
-needs to be determined at runtime (and not hard-coded). Such values might be
-determined by the input data, or depend on a different branch of your pipeline.
+如果你的 `ParDo` 在处理输入 `PCollection` 中的每个元素时，都需要注入额外数据，则侧输入很有用，但这些额外数据需要在运行时确定（而不是硬编码）。 这些值可能由输入数据确定，或取决于管道的不同分支。
 
 
 #### 4.4.1. 将侧输入传递给ParDo {#side-inputs-pardo}
 
 ```java
-  // Pass side inputs to your ParDo transform by invoking .withSideInputs.
-  // Inside your DoFn, access the side input by using the method DoFn.ProcessContext.sideInput.
+  // 通过调用.withSideInputs将你的侧输入传递给ParDo转换。
+  // 在你的DoFn内部，使用方法DoFn.ProcessContext.sideInput访问侧输入。
 
-  // The input PCollection to ParDo.
+  // 输入PCollection到ParDo。
   PCollection<String> words = ...;
 
-  // A PCollection of word lengths that we'll combine into a single value.
-  PCollection<Integer> wordLengths = ...; // Singleton PCollection
+  // 单词长度的PCollection，我们将组合成单个值。
+  PCollection<Integer> wordLengths = ...; // 单个PCollection
 
-  // Create a singleton PCollectionView from wordLengths using Combine.globally and View.asSingleton.
+  // 使用Combine.globally和View.asSingleton从wordLengths创建一个单例PCollectionView。
   final PCollectionView<Integer> maxWordLengthCutOffView =
      wordLengths.apply(Combine.globally(new Max.MaxIntFn()).asSingletonView());
 
 
-  // Apply a ParDo that takes maxWordLengthCutOffView as a side input.
+  // 应用一个将maxWordLengthCutOffView作为侧输入的ParDo。
   PCollection<String> wordsBelowCutOff =
   words.apply(ParDo
       .of(new DoFn<String, String>() {
           @ProcessElement
           public void processElement(@Element String word, OutputReceiver<String> out, ProcessContext c) {
-            // In our DoFn, access the side input.
+            // 在我们的DoFn中，访问侧输入
             int lengthCutOff = c.sideInput(maxWordLengthCutOffView);
             if (word.length() <= lengthCutOff) {
               out.output(word);
@@ -1102,125 +1083,119 @@ determined by the input data, or depend on a different branch of your pipeline.
   );
 ```
 ```py
-# Side inputs are available as extra arguments in the DoFn's process method or Map / FlatMap's callable.
-# Optional, positional, and keyword arguments are all supported. Deferred arguments are unwrapped into their
-# actual values. For example, using pvalue.AsIteor(pcoll) at pipeline construction time results in an iterable
-# of the actual elements of pcoll being passed into each process invocation. In this example, side inputs are
-# passed to a FlatMap transform as extra arguments and consumed by filter_using_length.
+# 侧输入在DoFn的过程方法或Map/FlatMap的可调用中可用作额外参数。
+# 可选参数，位置参数和关键字参数都支持。 延迟参数将被解包为它们的实际值。
+# 例如，在管道构造时使用pvalue.AsIteor(pcoll)会导致pcoll的实际元素可迭代传递到每个流程调用中。
+#在此示例中，侧输入作为额外参数传递给FlatMap变换，并由filter_using_length使用。
 words = ...
-{% github_sample /apache/beam/blob/master/sdks/python/apache_beam/examples/snippets/snippets_test.py tag:model_pardo_side_input
-%}
+# Callable需要额外的参数。
+def filter_using_length(word, lower_bound, upper_bound=float('inf')):
+  if lower_bound <= len(word) <= upper_bound:
+    yield word
 
-# We can also pass side inputs to a ParDo transform, which will get passed to its process method.
-# The first two arguments for the process method would be self and element.
+# 构造一个延迟的侧输入。
+avg_word_len = (words
+                | beam.Map(len)
+                | beam.CombineGlobally(beam.combiners.MeanCombineFn()))
 
-{% github_sample /apache/beam/blob/master/sdks/python/apache_beam/examples/snippets/snippets_test.py tag:model_pardo_side_input_dofn
-%}
+# 使用明确的侧输入调用。
+small_words = words | 'small' >> beam.FlatMap(filter_using_length, 0, 3)
+
+# 单个延迟的侧输入。
+larger_than_average = (words | 'large' >> beam.FlatMap(
+    filter_using_length,
+    lower_bound=pvalue.AsSingleton(avg_word_len)))
+
+# 混合和匹配。
+small_but_nontrivial = words | beam.FlatMap(
+    filter_using_length,
+    lower_bound=2,
+    upper_bound=pvalue.AsSingleton(avg_word_len))
+
+# 我们还可以将侧输入传递给一个ParDo变换，该变换将传递给它的process方法。
+# process方法的前两个参数是self和element。
+class FilterUsingLength(beam.DoFn):
+  def process(self, element, lower_bound, upper_bound=float('inf')):
+    if lower_bound <= len(element) <= upper_bound:
+      yield element
+
+small_words = words | beam.ParDo(FilterUsingLength(), 0, 3)
 ...
 ```
 
 #### 4.4.2. 侧输入和窗口 {#side-inputs-windowing}
 
-A windowed `PCollection` may be infinite and thus cannot be compressed into a
-single value (or single collection class). When you create a `PCollectionView`
-of a windowed `PCollection`, the `PCollectionView` represents a single entity
-per window (one singleton per window, one list per window, etc.).
+一个窗口化 `PCollection` 可能是无限的，因此不能压缩为单个值（或单个集合类）。 当你为一个窗口化的 `PCollection` 创建一个 `PCollectionView` 时，`PCollectionView` 表示每个窗口的一个实体（每个窗口一个单例，每个窗口一个列表等）。
 
-Beam uses the window(s) for the main input element to look up the appropriate
-window for the side input element. Beam projects the main input element's window
-into the side input's window set, and then uses the side input from the
-resulting window. If the main input and side inputs have identical windows, the
-projection provides the exact corresponding window. However, if the inputs have
-different windows, Beam uses the projection to choose the most appropriate side
-input window.
+Beam使用主输入元素的窗口来查找侧输入元素的适当窗口。 Beam将主输入元素的窗口投影到侧输入的窗口集中，然后使用来自结果窗口中的侧输入。 如果主输入和侧输入具有相同的窗口，则投影提供精确的对应窗口。 然而，如果输入具有不同的窗口，则Beam使用投影选择最合适的侧输入窗口。
 
-For example, if the main input is windowed using fixed-time windows of one
-minute, and the side input is windowed using fixed-time windows of one hour,
-Beam projects the main input window against the side input window set and
-selects the side input value from the appropriate hour-long side input window.
+例如，如果使用一分钟的固定时间窗口对主输入进行窗口化，并且使用一小时的固定时间窗口对侧面输入进行窗口化，则Beam将主输入窗口投影到侧面输入窗口设置并从适当的时长侧输入窗口中选择侧输入值。
 
-If the main input element exists in more than one window, then `processElement`
-gets called multiple times, once for each window. Each call to `processElement`
-projects the "current" window for the main input element, and thus might provide
-a different view of the side input each time.
+如果主输入元素存在于多个窗口中，则会多次调用 `processElement`，每窗口调用一次。 每次调用 `processElement` 都会为主输入元素投影“current”窗口，因此每次都可能提供不同的侧输入视图。
 
-If the side input has multiple trigger firings, Beam uses the value from the
-latest trigger firing. This is particularly useful if you use a side input with
-a single global window and specify a trigger.
+如果侧输入有多个触发器触发，则Beam使用最新触发器触发的值。 如果你使用带有单个全局窗口的侧输入并指定触发器，则这个功能特别有用。
 
 ### 4.5. 额外的输出 {#additional-outputs}
 
-While `ParDo` always produces a main output `PCollection` (as the return value
-from `apply`), you can also have your `ParDo` produce any number of additional
-output `PCollection`s. If you choose to have multiple outputs, your `ParDo`
-returns all of the output `PCollection`s (including the main output) bundled
-together.
+虽然 `ParDo` 始终生成一个主输出 `PCollection`（作为 `apply` 的返回值），但你也可以让 `ParDo` 生成任意数量的额外输出 `PCollection` 。 如果您选择具有多个输出，则 `ParDo` 将返回捆绑在一起的所有输出`PCollection`（包括主输出）。
 
 #### 4.5.1. 用于多个输出的标签 {#output-tags}
 
 ```java
-// To emit elements to multiple output PCollections, create a TupleTag object to identify each collection
-// that your ParDo produces. For example, if your ParDo produces three output PCollections (the main output
-// and two additional outputs), you must create three TupleTags. The following example code shows how to
-// create TupleTags for a ParDo with three output PCollections.
+// 为了将元素发出到多个输出PCollections，请创建一个TupleTag对象以标识ParDo生成的每个集合。
+// 例如，如果你的ParDo产生三个输出PCollections（主输出和两个额外输出），则必须创建三个TupleTag。
+// 以下示例代码显示如何为具有三个输出PCollections的ParDo创建TupleTag。
 
-  // Input PCollection to our ParDo.
+  // 输入PCollection到我们的ParDo。
   PCollection<String> words = ...;
 
-  // The ParDo will filter words whose length is below a cutoff and add them to
-  // the main ouput PCollection<String>.
-  // If a word is above the cutoff, the ParDo will add the word length to an
-  // output PCollection<Integer>.
-  // If a word starts with the string "MARKER", the ParDo will add that word to an
-  // output PCollection<String>.
+  // ParDo将过滤长度低于截止值的单词，并将它们添加到主输出PCollection<String>。
+  // 如果一个单词高于截止值，ParDo会将字长添加到输出PCollection<Integer>。
+  // 如果一个单词以字符串“MARKER”开头，则ParDo会将该单词添加到输出PCollection <String>。
   final int wordLengthCutOff = 10;
 
-  // Create three TupleTags, one for each output PCollection.
-  // Output that contains words below the length cutoff.
+  // 创建三个TupleTag，每个输出PCollection一个。
+  // 包含低于长度截止值的单词的输出。
   final TupleTag<String> wordsBelowCutOffTag =
       new TupleTag<String>(){};
-  // Output that contains word lengths.
+  // 包含字长的输出。
   final TupleTag<Integer> wordLengthsAboveCutOffTag =
       new TupleTag<Integer>(){};
-  // Output that contains "MARKER" words.
+  // 包含“MARKER”单词的输出。
   final TupleTag<String> markedWordsTag =
       new TupleTag<String>(){};
 
-// Passing Output Tags to ParDo:
-// After you specify the TupleTags for each of your ParDo outputs, pass the tags to your ParDo by invoking
-// .withOutputTags. You pass the tag for the main output first, and then the tags for any additional outputs
-// in a TupleTagList. Building on our previous example, we pass the three TupleTags for our three output
-// PCollections to our ParDo. Note that all of the outputs (including the main output PCollection) are
-// bundled into the returned PCollectionTuple.
+// 将输出标签传递给ParDo：
+// 为你的每个ParDo输出指定TupleTags后，通过调用.withOutputTags将标记传递给ParDo。
+// 首先传递主输出的标记，然后传递TupleTagList中任何其他输出的标记。
+// 请注意，所有输出（包括主输出PCollection）都绑定到返回的PCollectionTuple中。
 
   PCollectionTuple results =
       words.apply(ParDo
           .of(new DoFn<String, String>() {
-            // DoFn continues here.
+            // DoFn继续在这里。
             ...
           })
-          // Specify the tag for the main output.
+          // 指定主输出的标记。
           .withOutputTags(wordsBelowCutOffTag,
-          // Specify the tags for the two additional outputs as a TupleTagList.
+          // 将两个额外输出的标记指定为TupleTagList。
                           TupleTagList.of(wordLengthsAboveCutOffTag)
                                       .and(markedWordsTag)));
 ```
 
 ```py
-# To emit elements to multiple output PCollections, invoke with_outputs() on the ParDo, and specify the
-# expected tags for the outputs. with_outputs() returns a DoOutputsTuple object. Tags specified in
-# with_outputs are attributes on the returned DoOutputsTuple object. The tags give access to the
-# corresponding output PCollections.
+# 要将元素发射到多个输出PCollections，请在ParDo上调用with_outputs()，并为输出指定预期的标记。
+# with_outputs()返回一个DoOutputsTuple对象。在with_outputs中指定的标记是返回的DoOutputsTuple对象的特性。
+# 标签可以访问相应的输出PCollections。
 
 results = (words | beam.ParDo(ProcessWords(), cutoff_length=2, marker='x')
            .with_outputs('above_cutoff_lengths', 'marked strings',
                          main='below_cutoff_strings'))
 below = results.below_cutoff_strings
 above = results.above_cutoff_lengths
-marked = results['marked strings']  # indexing works as well
+marked = results['marked strings']  # 索引也有效
 
-# The result is also iterable, ordered in the same order that the tags were passed to with_outputs(),
-# the main tag (if specified) first.
+# 结果也是可迭代的，按照与标签传递给with_outputs()的顺序相同的顺序排序，首先是主标记（如果指定）。
 
 below, above, marked = (words
                         | beam.ParDo(
@@ -1230,52 +1205,51 @@ below, above, marked = (words
                                       main='below_cutoff_strings'))
 
 ```
-#### 4.5.2. 在您的DoFn中发送多个输出 {#multiple-outputs-dofn}
+#### 4.5.2. 在你的DoFn中发送多个输出 {#multiple-outputs-dofn}
 
 ```java
-// Inside your ParDo's DoFn, you can emit an element to a specific output PCollection by providing a
-// MultiOutputReceiver to your process method, and passing in the appropriate TupleTag to obtain an OutputReceiver.
-// After your ParDo, extract the resulting output PCollections from the returned PCollectionTuple.
-// Based on the previous example, this shows the DoFn emitting to the main output and two additional outputs.
+// 在ParDo的DoFn中，您可以通过向process方法提供一个MultiOutputReceiver并传入适当的TupleTag来获取一个OutputReceiver，从而向特定的输出PCollection发出一个元素。
+// 在执行ParDo之后，从返回的PCollectionTuple中提取结果输出PCollections。
+// 根据前面的示例，这显示了发送到主输出和两个额外输出的DoFn。
 
   .of(new DoFn<String, String>() {
      public void processElement(@Element String word, MultiOutputReceiver out) {
        if (word.length() <= wordLengthCutOff) {
-         // Emit short word to the main output.
-         // In this example, it is the output with tag wordsBelowCutOffTag.
+         // 向主输出发出简短的单词。
+         // 在此示例中，它是带有标签wordsBelowCutOffTag的输出。
          out.get(wordsBelowCutOffTag).output(word);
        } else {
-         // Emit long word length to the output with tag wordLengthsAboveCutOffTag.
+         // 使用标签wordLengthsAboveCutOffTag将长单词发送到输出。
          out.get(wordLengthsAboveCutOffTag).output(word.length());
        }
        if (word.startsWith("MARKER")) {
-         // Emit word to the output with tag markedWordsTag.
+         // 使用标签markedWordsTag向输出发出单词。
          out.get(markedWordsTag).output(word);
        }
      }}));
 ```
 
 ```py
-# Inside your ParDo's DoFn, you can emit an element to a specific output by wrapping the value and the output tag (str).
-# using the pvalue.OutputValue wrapper class.
-# Based on the previous example, this shows the DoFn emitting to the main output and two additional outputs.
+# 在ParDo的DoFn中，您可以通过包装值和输出标记（str）将元素发送到特定输出。
+# 使用pvalue.OutputValue包装类。
+# 基于前面的示例，这显示了发送到主输出和两个额外输出的DoFn。
 
 class ProcessWords(beam.DoFn):
 
   def process(self, element, cutoff_length, marker):
     if len(element) <= cutoff_length:
-      # Emit this short word to the main output.
+      # 将这个简短的单词发给主输出。
       yield element
     else:
-      # Emit this word's long length to the 'above_cutoff_lengths' output.
+      # 将此单词的长度发送到'above_cutoff_lengths'输出。
       yield pvalue.TaggedOutput(
           'above_cutoff_lengths', len(element))
     if element.startswith(marker):
-      # Emit this word to a different output with the 'marked strings' tag.
+      # 使用“marked strings”标签将此单词发送到不同的输出。
       yield pvalue.TaggedOutput('marked strings', element)
 
-# Producing multiple outputs is also available in Map and FlatMap.
-# Here is an example that uses FlatMap and shows that the tags do not need to be specified ahead of time.
+# 在Map和FlatMap中也可以生成多个输出。
+# 下面是一个使用FlatMap的示例，它显示不需要预先指定标记。
 
 def even_odd(x):
   yield pvalue.TaggedOutput('odd' if x % 2 else 'even', x)
@@ -1286,19 +1260,18 @@ results = numbers | beam.FlatMap(even_odd).with_outputs()
 
 evens = results.even
 odds = results.odd
-tens = results[None]  # the undeclared main output
+tens = results[None]  #未声明的主输出
 
 ```
 
 
-#### 4.5.3. 在您DoFn中访问其他的参数 {#other-dofn-parameters}
+#### 4.5.3. 在你DoFn中访问其他的参数 {#other-dofn-parameters}
 
-In addition to the element and the `OutputReceiver`, Beam will populate other parameters to your DoFn's `@ProcessElement` method.
-Any combination of these parameters can be added to your process method in any order.
+除了元素和 `OutputReceiver`之外，Beam还会将其他参数填充到DoFn的 `@ProcessElement` 方法中。 可以按任何顺序将这些参数的任意组合添加到你的process方法中。
 
 
 **时间戳:**
-To access the timestamp of an input element, add a parameter annotated with `@Timestamp` of type `Instant`. For example:
+要访问输入元素的时间戳，请添加一个使用Instant类型的 `@Timestamp` 注解的参数。 例如： 
 
 ```java
 .of(new DoFn<String, String>() {
@@ -1309,11 +1282,7 @@ To access the timestamp of an input element, add a parameter annotated with `@Ti
 
 
 **窗口:**
-To access the window an input element falls into, add a parameter of the type of the window used for the input `PCollection`.
-If the parameter is a window type (a subclass of `BoundedWindow`) that does not match the input `PCollection`, then an error
-will be raised. If an element falls in multiple windows (for example, this will happen when using `SlidingWindows`), then the
-`@ProcessElement` method will be invoked multiple time for the element, once for each window. For example, when fixed windows
-are being used, the window is of type `IntervalWindow`.
+要访问输入元素所在的窗口，请添加用于输入 `PCollection` 的窗口类型的参数。 如果参数是与输入 `PCollection` 不匹配的窗口类型（ `BoundedWindow` 的子类），则会引发错误。 如果一个元素落在多个窗口中（例如，当使用 `SlidingWindows` 时会发生这种情况），那么将为该元素多次调用 `@ProcessElement` 方法，每个窗口调用一次。 例如，当使用固定窗口时，窗口的类型为  `IntervalWindow`。
 
 ```java
 .of(new DoFn<String, String>() {
@@ -1322,8 +1291,7 @@ are being used, the window is of type `IntervalWindow`.
 ```
 
 **PaneInfo:**
-When triggers are used, Beam provides a `PaneInfo` object that contains information about the current firing. Using `PaneInfo`
-you can determine whether this is an early or a late firing, and how many times this window has already fired for this key.
+当使用触发器时，Beam提供了一个 `PaneInfo` 对象，其中包含有关当前触发的信息。 使用  `PaneInfo`，您可以确定这是一个早还是晚触发，以及这个窗口已经为这个键触发了多少次。
 
 ```java
 .of(new DoFn<String, String>() {
@@ -1332,54 +1300,35 @@ you can determine whether this is an early or a late firing, and how many times 
 ```
 
 **PipelineOptions:**
-The `PipelineOptions` for the current pipeline can always be accessed in a process method by adding it as a parameter:
+通过将它作为参数添加，始终可以在process方法中访问当前管道的 `PipelineOptions` ：
 ```java
 .of(new DoFn<String, String>() {
      public void processElement(@Element String word, PipelineOptions options) {
   }})
 ```
 
-`@OnTimer` methods can also access many of these parameters. Timestamp, window, `PipelineOptions`, `OutputReceiver`, and
-`MultiOutputReceiver` parameters can all be accessed in an `@OnTimer` method. In addition, an `@OnTimer` method can take
-a parameter of type `TimeDomain` which tells whether the timer is based on event time or processing time.
-Timers are explained in more detail in the
-[Timely (and Stateful) Processing with Apache Beam]({{ site.baseurl }}/blog/2017/08/28/timely-processing.html) blog post.
+`@OnTimer` 方法也可以访问这些参数。 可以在 `@OnTimer` 方法中访问Timestamp，window，`PipelineOptions`，`OutputReceiver` 和 `MultiOutputReceiver` 参数。 此外，`@OnTimer` 方法可以接受一个 `TimeDomain` 类型的参数，该参数指示计时器是基于事件时间还是处理时间。 定时器将在Apache Beam博客文章的[及时（和有状态）处理](https://beam.apache.org/blog/2017/08/28/timely-processing.html)中有更详细的解释。
 
 ### 4.6. 组合变换 {#composite-transforms}
 
-Transforms can have a nested structure, where a complex transform performs
-multiple simpler transforms (such as more than one `ParDo`, `Combine`,
-`GroupByKey`, or even other composite transforms). These transforms are called
-composite transforms. Nesting multiple transforms inside a single composite
-transform can make your code more modular and easier to understand.
+变换可以具有嵌套结构，其中复杂变换执行多个更简单的变换（例如多个 `ParDo`，`Combine`，`GroupByKey` 或甚至其他组合变换）。 这些变换称为组合变换。 在单个组合变换中嵌套多个变换可以使您的代码更加模块化，更易于理解。
 
-The Beam SDK comes packed with many useful composite transforms. See the API
-reference pages for a list of transforms:
-  * [Pre-written Beam transforms for Java](https://beam.apache.org/releases/javadoc/{{ site.release_latest }}/index.html?org/apache/beam/sdk/transforms/package-summary.html)
-  * [Pre-written Beam transforms for Python](https://beam.apache.org/releases/pydoc/{{ site.release_latest }}/apache_beam.transforms.html)
+Beam SDK中包含许多有用的组合变换。 有关变换列表，请参阅API参考页面：
+  * [为Java预先编写的Beam变换](https://beam.apache.org/releases/javadoc/2.13.0/index.html?org/apache/beam/sdk/transforms/package-summary.html)
+  * [为Python预先编写的Beam变换](https://beam.apache.org/releases/pydoc/2.13.0/apache_beam.transforms.html)
 
 #### 4.6.1. 一个组合变换的例子 {#composite-transform-example}
 
-The `CountWords` transform in the [WordCount example program]({{ site.baseurl }}/get-started/wordcount-example/)
-is an example of a composite transform. `CountWords` is a `PTransform` subclass
-that consists of multiple nested transforms.
+[WordCount示例程序](https://beam.apache.org/get-started/wordcount-example/)中的 `CountWords` 变换是组合变换的示例。`CountWords` 是一个 `PTransform` 子类，由多个嵌套变换组成。
 
-In its `expand` method, the `CountWords` transform applies the following
-transform operations:
+在它的 `expand` 方法中，`CountWords` 变换应用以下变换操作：
 
-  1. It applies a `ParDo` on the input `PCollection` of text lines, producing
-     an output `PCollection` of individual words.
-  2. It applies the Beam SDK library transform `Count` on the `PCollection` of
-     words, producing a `PCollection` of key/value pairs. Each key represents a
-     word in the text, and each value represents the number of times that word
-     appeared in the original data.
+  1. 它在文本行的输入 `PCollection` 上应用 `ParDo` ，产生单个单词的输出 `PCollection` 。
+  2.它将Beam SDK库转换 `Count` 应用于单词的 `PCollection` 上，生成一个键/值对的 `PCollection` 。每个键代表文本中的一个单词，每个值表示该单词出现在原始数据中的次数。
 
-Note that this is also an example of nested composite transforms, as `Count`
-is, by itself, a composite transform.
+请注意，这也是嵌套复合变换的一个例子，因为 `Count` 本身就是一个复合变换。
 
-Your composite transform's parameters and return value must match the initial
-input type and final return type for the entire transform, even if the
-transform's intermediate data changes type multiple times.
+复合变换的参数和返回值必须与整个变换的初始输入类型和最终返回类型匹配，即使变换的中间数据多次更改类型也是如此。
 
 ```java
   public static class CountWords extends PTransform<PCollection<String>,
@@ -1387,11 +1336,11 @@ transform's intermediate data changes type multiple times.
     @Override
     public PCollection<KV<String, Long>> expand(PCollection<String> lines) {
 
-      // Convert lines of text into individual words.
+      // 将文本行转换为单个单词。
       PCollection<String> words = lines.apply(
           ParDo.of(new ExtractWordsFn()));
 
-      // Count the number of times each word occurs.
+      // 计算每个单词出现的次数。
       PCollection<KV<String, Long>> wordCounts =
           words.apply(Count.<String>perElement());
 
@@ -1401,35 +1350,27 @@ transform's intermediate data changes type multiple times.
 ```
 
 ```py
-# The CountWords Composite Transform inside the WordCount pipeline.
+# WordCount管道内的CountWords复合变换。
 class CountWords(beam.PTransform):
 
   def expand(self, pcoll):
     return (pcoll
-            # Convert lines of text into individual words.
+            # 将文本行转换为单个单词。
             | 'ExtractWords' >> beam.ParDo(ExtractWordsFn())
-            # Count the number of times each word occurs.
+            # 计算每个单词出现的次数。
             | beam.combiners.Count.PerElement()
-            # Format each word and count into a printable string.
+            # 格式化每个单词并计入为一个可打印的字符串。
             | 'FormatCounts' >> beam.ParDo(FormatCountsFn()))
 
 ```
 
 #### 4.6.2. 创建一个组合变换 {#composite-transform-creation}
 
-To create your own composite transform, create a subclass of the `PTransform`
-class and override the `expand` method to specify the actual processing logic.
-You can then use this transform just as you would a built-in transform from the
-Beam SDK.
+要创建自己的组合变换，请创建 `PTransform` 类的子类并覆盖 `expand` 方法以指定实际的处理逻辑。 然后，您可以像使用Beam SDK中的内置变换一样使用此转换。
 
-{:.language-java}
-For the `PTransform` class type parameters, you pass the `PCollection` types
-that your transform takes as input, and produces as output. To take multiple
-`PCollection`s as input, or produce multiple `PCollection`s as output, use one
-of the multi-collection types for the relevant type parameter.
+对于 `PTransform` 类类型参数，可以传递变换所用的 `PCollection` 类型作为输入，并生成输出。 要将多个 `PCollection` 作为输入，或生成多个 `PCollection` 作为输出，请使用多个集合类型之一作为相关类型参数。 
 
-The following code sample shows how to declare a `PTransform` that accepts a
-`PCollection` of `String`s for input, and outputs a `PCollection` of `Integer`s:
+以下代码示例演示了如何声明一个 `PTransform`， 它接受一个作为 `String` 的 `PCollection` 输入，并输出一个 `Integer` 的 `PCollection` ：
 
 ```java
   static class ComputeWordLengths
@@ -1441,18 +1382,13 @@ The following code sample shows how to declare a `PTransform` that accepts a
 ```Py
 class ComputeWordLengths(beam.PTransform):
   def expand(self, pcoll):
-    # Transform logic goes here.
+    # 变换逻辑在这里
     return pcoll | beam.Map(lambda x: len(x))
 ```
 
-Within your `PTransform` subclass, you'll need to override the `expand` method.
-The `expand` method is where you add the processing logic for the `PTransform`.
-Your override of `expand` must accept the appropriate type of input
-`PCollection` as a parameter, and specify the output `PCollection` as the return
-value.
+在你的 `PTransform` 子类中，您需要覆盖 `expand` 方法。 您可以在 `expand` 方法中添加 `PTransform` 的处理逻辑。 您对 `expand` 的覆盖必须接受相应类型的输入 `PCollection` 作为参数，并将输出 `PCollection` 指定为返回值。
 
-The following code sample shows how to override `expand` for the
-`ComputeWordLengths` class declared in the previous example:
+以下代码示例显示如何覆盖上一个示例中，在 `ComputeWordLengths` 类里面声明的的 `expand` 方法：
 
 ```java
   static class ComputeWordLengths
@@ -1460,7 +1396,7 @@ The following code sample shows how to override `expand` for the
     @Override
     public PCollection<Integer> expand(PCollection<String>) {
       ...
-      // transform logic goes here
+      // 变换逻辑在这里
       ...
     }
 ```
@@ -1468,45 +1404,24 @@ The following code sample shows how to override `expand` for the
 ```py
 class ComputeWordLengths(beam.PTransform):
   def expand(self, pcoll):
-    # Transform logic goes here.
+    # 变换逻辑在这里
     return pcoll | beam.Map(lambda x: len(x))
 ```
+只要你覆盖 `PTransform` 子类中的 `expand` 方法以接受适当的输入 `PCollection` 并返回相应的输出 `PCollection` ，你就可以包含任意数量的变换。 这些变换可以包括核心变换，组合变换或Beam SDK库中包含的变换。
 
-As long as you override the `expand` method in your `PTransform` subclass to
-accept the appropriate input `PCollection`(s) and return the corresponding
-output `PCollection`(s), you can include as many transforms as you want. These
-transforms can include core transforms, composite transforms, or the transforms
-included in the Beam SDK libraries.
-
-**Note:** The `expand` method of a `PTransform` is not meant to be invoked
-directly by the user of a transform. Instead, you should call the `apply` method
-on the `PCollection` itself, with the transform as an argument. This allows
-transforms to be nested within the structure of your pipeline.
+**注意：**  `PTransform` 的 `expand` 方法不应由一个变换的用户直接调用。 相反，您应该在 `PCollection` 本身上调用 `apply` 方法，然后就将变换作为参数。 这允许变换嵌套在你的管道结构中。
 
 #### 4.6.3. PTransform风格指南 {#ptransform-style-guide}
 
-The [PTransform Style Guide]({{ site.baseurl }}/contribute/ptransform-style-guide/)
-contains additional information not included here, such as style guidelines,
-logging and testing guidance, and language-specific considerations.  The guide
-is a useful starting point when you want to write new composite PTransforms.
+[PTransform风格指南](https://beam.apache.org/contribute/ptransform-style-guide/)包含这里没有包含的其他信息，例如风格指南，日志和测试指导以及特定于语言的注意事项。 当您想要编写新的组合PTransforms时，该指南是一个有用的起点。
 
 ## 5. 管道I/O. {#pipeline-io}
 
-When you create a pipeline, you often need to read data from some external
-source, such as a file or a database. Likewise, you may
-want your pipeline to output its result data to an external storage system.
-Beam provides read and write transforms for a [number of common data storage
-types]({{ site.baseurl }}/documentation/io/built-in/). If you want your pipeline
-to read from or write to a data storage format that isn't supported by the
-built-in transforms, you can [implement your own read and write
-transforms]({{site.baseurl }}/documentation/io/developing-io-overview/).
+当你创建一个管道时，通常需要从某些外部源（例如文件或数据库）读取数据。 同样，您可能希望管道将它的结果数据输出到外部存储系统。 Beam为许多常见的数据存储类型提供读写变换。 如果希望管道读取或写入的数据存储格式是内置变换不支持的，则可以实现自己的读写变换。
 
 ### 5.1. 读取输入数据 {#pipeline-io-reading-data}
 
-Read transforms read data from an external source and return a `PCollection`
-representation of the data for use by your pipeline. You can use a read
-transform at any point while constructing your pipeline to create a new
-`PCollection`, though it will be most common at the start of your pipeline.
+读取变换从外部源读取数据并返回数据的 `PCollection` 表示形式，以供管道使用。 虽然它在你的管道开始时最常见，但在构建管道时，你可以随时使用读取变换来创建一个新的 `PCollection`。
 
 ```java
 PCollection<String> lines = p.apply(TextIO.read().from("gs://some/inputData.txt"));
@@ -1518,10 +1433,7 @@ lines = pipeline | beam.io.ReadFromText('gs://some/inputData.txt')
 
 ### 5.2. 写入输出数据 {#pipeline-io-writing-data}
 
-Write transforms write the data in a `PCollection` to an external data source.
-You will most often use write transforms at the end of your pipeline to output
-your pipeline's final results. However, you can use a write transform to output
-a `PCollection`'s data at any point in your pipeline.
+写变换将 `PCollection` 中的数据写到外部数据源。 你通常在管道的末尾使用写转换来输出管道的最终结果。 但是，您可以使用写变换在管道中的任何位置输出 `PCollection` 的数据。
 
 ```java
 output.apply(TextIO.write().to("gs://some/outputData"));
@@ -1535,11 +1447,7 @@ output | beam.io.WriteToText('gs://some/outputData')
 
 #### 5.3.1. 从多个位置读取 {#file-based-reading-multiple-locations}
 
-Many read transforms support reading from multiple input files matching a glob
-operator you provide. Note that glob operators are filesystem-specific and obey
-filesystem-specific consistency models. The following TextIO example uses a glob
-operator (\*) to read all matching input files that have prefix "input-" and the
-suffix ".csv" in the given location:
+许多读变换支持从您提供的一个glob运算符匹配的多个输入文件中读取。 请注意，glob运算符是特定于文件系统的，并遵循特定于文件系统的一致性模型。 以下TextIO示例使用一个glob运算符（*）来读取在给定位置具有前缀“input-”和后缀“.csv”的所有匹配输入文件：
 
 ```java
 p.apply(“ReadFromText”,
@@ -1549,21 +1457,13 @@ p.apply(“ReadFromText”,
 ```py
 lines = p | 'ReadFromText' >> beam.io.ReadFromText('path/to/input-*.csv')
 ```
-
-To read data from disparate sources into a single `PCollection`, read each one
-independently and then use the [Flatten](#flatten) transform to create a single
-`PCollection`.
+要将来自不同源的数据读入单个 `PCollection`，请单独读取每个 `PCollection`，然后使用 [Flatten](#flatten)变换创建单个 `PCollection`。
 
 #### 5.3.2. 写入多个输出文件 {#file-based-writing-multiple-files}
 
-For file-based output data, write transforms write to multiple output files by
-default. When you pass an output file name to a write transform, the file name
-is used as the prefix for all output files that the write transform produces.
-You can append a suffix to each output file by specifying a suffix.
+对于基于文件的输出数据，默认情况下，写变换将写入多个输出文件。 当你将输出文件名传递给写变换时，文件名将用作写变换生成的所有输出文件的前缀。 您可以通过指定后缀为每个输出文件追加后缀。
 
-The following write transform example writes multiple output files to a
-location. Each file has the prefix "numbers", a numeric tag, and the suffix
-".csv".
+以下的写变换示例将多个输出文件写入某个位置。 每个文件都有“numbers”前缀，一个数字标签和“.csv”后缀。
 
 ```java
 records.apply("WriteToText",
@@ -1578,116 +1478,50 @@ filtered_words | 'WriteToText' >> beam.io.WriteToText(
 
 ### 5.4. Beam提供的I/O变换 {#provided-io-transforms}
 
-See the [Beam-provided I/O Transforms]({{site.baseurl }}/documentation/io/built-in/)
-page for a list of the currently available I/O transforms.
+有关当前可用I/O变换的列表，请参见[Beam提供的I/O变换](https://beam.apache.org/documentation/io/built-in/)页面。
 
 ## 6. 数据编码和类型安全 {#data-encoding-and-type-safety}
 
-When Beam runners execute your pipeline, they often need to materialize the
-intermediate data in your `PCollection`s, which requires converting elements to
-and from byte strings. The Beam SDKs use objects called `Coder`s to describe how
-the elements of a given `PCollection` may be encoded and decoded.
+当Beam运行程序执行你的管道时，它们通常需要在你的 `PCollection` 中物化中间数据，这需要将元素转换为字节字符串和从字节字符串转换回元素。 Beam SDK使用称为 `Coder` 的对象来描述如何编码和解码一个给定 `PCollection` 的元素。
 
-> Note that coders are unrelated to parsing or formatting data when interacting
-> with external data sources or sinks. Such parsing or formatting should
-> typically be done explicitly, using transforms such as `ParDo` or
-> `MapElements`.
+>请注意，在与外部数据源或接收器交互时，编码器与解析或格式化数据无关。 通常应使用 `ParDo` 或 `MapElements` 等转换明确地进行此类解析或格式化。
 
 
-In the Beam SDK for Java, the type `Coder` provides the methods required for
-encoding and decoding data. The SDK for Java provides a number of Coder
-subclasses that work with a variety of standard Java types, such as Integer,
-Long, Double, StringUtf8 and more. You can find all of the available Coder
-subclasses in the [Coder package](https://github.com/apache/beam/tree/master/sdks/java/core/src/main/java/org/apache/beam/sdk/coders).
+在用于Java的Beam SDK中，类型 `Coder` 提供了编码和解码数据所需的方法。在用于Java的SDK中，提供了许多Coder子类，它们可以处理各种标准Java类型，例如Integer，Long，Double，StringUtf8等。 您可以在[Coder包](https://github.com/apache/beam/tree/master/sdks/java/core/src/main/java/org/apache/beam/sdk/coders)中找到所有可用的Coder子类。
 
 
-In the Beam SDK for Python, the type `Coder` provides the methods required for
-encoding and decoding data. The SDK for Python provides a number of Coder
-subclasses that work with a variety of standard Python types, such as primitive
-types, Tuple, Iterable, StringUtf8 and more. You can find all of the available
-Coder subclasses in the
-[apache_beam.coders](https://github.com/apache/beam/tree/master/sdks/python/apache_beam/coders)
-package.
+在Python的Beam SDK中，`Coder` 类型提供了编码和解码数据所需的方法。在用于Python的SDK中，提供了许多Coder子类，它们可以处理各种标准Python类型，例如基本类型，Tuple，Iterable，StringUtf8等。 您可以在[apache_beam.coders](https://github.com/apache/beam/tree/master/sdks/python/apache_beam/coders)包中找到所有可用的Coder子类。
 
-> Note that coders do not necessarily have a 1:1 relationship with types. For
-> example, the Integer type can have multiple valid coders, and input and output
-> data can use different Integer coders. A transform might have Integer-typed
-> input data that uses BigEndianIntegerCoder, and Integer-typed output data that
-> uses VarIntCoder.
+> 请注意，编码器与类型不一定具有1：1的关系。 例如，整数类型可以有多个有效的编码器，输入和输出数据可以使用不同的整数类型编码器。 一个变换可能包含使用BigEndianIntegerCoder的整数类型输入数据和使用VarIntCoder的整数类型输出数据。
 
 ### 6.1. 指定编码器 {#specifying-coders}
 
-The Beam SDKs require a coder for every `PCollection` in your pipeline. In most
-cases, the Beam SDK is able to automatically infer a `Coder` for a `PCollection`
-based on its element type or the transform that produces it, however, in some
-cases the pipeline author will need to specify a `Coder` explicitly, or develop
-a `Coder` for their custom type.
+Beam SDKs需要为你的管道中的每个 `PCollection` 提供一个编码器。在大多数情况下，Beam SDK能够根据它的元素类型或产生它的变换自动推断出 `PCollection` 的 `Coder` ，但是，在某些情况下，管道作者需要明确指定一个 `Coder` ，或者为他们的自定义类型开发一个 `Coder` 。 
+
+您可以使用 `PCollection.setCoder` 方法为现有的 `PCollection` 显式设置编码器。 请注意，您不能在已完成的 `PCollection` 上调用 `setCoder` （例如，在它的上面调用 `.apply` ）。
+
+您可以使用 `getCoder` 方法获取现有 `PCollection` 的编码器。 如果尚未设置编码器且无法为给定的 `PCollection`推断出编码器，则此方法将失败并返回 `IllegalStateException` 异常。
+
+当尝试自动推断出一个 `PCollection`的 `Coder` 时，Beam SDK使用各种机制。
+
+每个管道对象都有一个 `CoderRegistry`。`CoderRegistry` 表示Java类型到默认编码器的映射，管道应该使用这些默认编码器来处理每种类型的 `PCollection`。
+
+Python的Beam SDK也有一个 `CoderRegistry` ，它表示Python类型到默认编码器的映射，每种类型的 `PCollection` 都应该使用默认编码器。 
+
+默认情况下，用于Java的Beam SDK会自动使用变换函数对象中的类型参数（如 `DoFn`）为 `PTransform` 生成的一个 `PCollection` 元素推断出 `Coder` 。 例如，在 `ParDo` 的情况下，一个 `DoFn<Integer, String>` 函数对象接受 `Integer` 类型的输入元素，并生成 `String` 类型的输出元素。 在这种情况下，Java SDK将自动推断输出  `PCollection<String>`的默认 `Coder` （在默认管道 `CoderRegistry`中，这是 `StringUtf8Coder`）。
+
+默认情况下，Python的Beam SDK使用变换函数对象中的类型提示（如 `DoFn`）自动为输出 `PCollection` 的元素推断出 `Coder` 。 在 `ParDo` 的情况下，例如具有类型提示 `@beam.typehints.with_input_types(int)` 和`@beam.typehints.with_output_types(str)` 的 `DoFn` 接受int类型的输入元素并生成str类型的输出元素。 在这种情况下，Python的Beam SDK将自动推断输出 `PCollection` 的默认 `Coder`（在默认管道`CoderRegistry`中，这是`BytesCoder`）。
+
+> 注意：如果你使用 `Create` 变换从内存数据中创建 `PCollection`，则不能依赖编码器推断和默认编码器。`Create` 不能访问它的参数的任何键入信息，如果参数列表包含其确切的运行时类没有注册默认编码器的值，则可能无法推断编码器。
 
 
-You can explicitly set the coder for an existing `PCollection` by using the
-method `PCollection.setCoder`. Note that you cannot call `setCoder` on a
-`PCollection` that has been finalized (e.g. by calling `.apply` on it).
-
-
-You can get the coder for an existing `PCollection` by using the method
-`getCoder`. This method will fail with an `IllegalStateException` if a coder has
-not been set and cannot be inferred for the given `PCollection`.
-
-Beam SDKs use a variety of mechanisms when attempting to automatically infer the
-`Coder` for a `PCollection`.
-
-
-Each pipeline object has a `CoderRegistry`. The `CoderRegistry` represents a
-mapping of Java types to the default coders that the pipeline should use for
-`PCollection`s of each type.
-
-
-The Beam SDK for Python has a `CoderRegistry` that represents a mapping of
-Python types to the default coder that should be used for `PCollection`s of each
-type.
-
-
-By default, the Beam SDK for Java automatically infers the `Coder` for the
-elements of a `PCollection` produced by a `PTransform` using the type parameter
-from the transform's function object, such as `DoFn`. In the case of `ParDo`,
-for example, a `DoFn<Integer, String>` function object accepts an input element
-of type `Integer` and produces an output element of type `String`. In such a
-case, the SDK for Java will automatically infer the default `Coder` for the
-output `PCollection<String>` (in the default pipeline `CoderRegistry`, this is
-`StringUtf8Coder`).
-
-
-By default, the Beam SDK for Python automatically infers the `Coder` for the
-elements of an output `PCollection` using the typehints from the transform's
-function object, such as `DoFn`. In the case of `ParDo`, for example a `DoFn`
-with the typehints `@beam.typehints.with_input_types(int)` and
-`@beam.typehints.with_output_types(str)` accepts an input element of type int
-and produces an output element of type str. In such a case, the Beam SDK for
-Python will automatically infer the default `Coder` for the output `PCollection`
-(in the default pipeline `CoderRegistry`, this is `BytesCoder`).
-
-> NOTE: If you create your `PCollection` from in-memory data by using the
-> `Create` transform, you cannot rely on coder inference and default coders.
-> `Create` does not have access to any typing information for its arguments, and
-> may not be able to infer a coder if the argument list contains a value whose
-> exact run-time class doesn't have a default coder registered.
-
-
-When using `Create`, the simplest way to ensure that you have the correct coder
-is by invoking `withCoder` when you apply the `Create` transform.
+使用 `Create` 时，确保拥有正确编码器的最简单方法是在应用 `Create` 变换时调用 `withCoder` 。
 
 ### 6.2. 默认编码器和CoderRegistry   {#default-coders-and-the-coderregistry}
 
-Each Pipeline object has a `CoderRegistry` object, which maps language types to
-the default coder the pipeline should use for those types. You can use the
-`CoderRegistry` yourself to look up the default coder for a given type, or to
-register a new default coder for a given type.
+每个管道对象都有一个 `CoderRegistry` 对象，它将语言类型映射到管道应该为这些类型使用的默认编码器。 您可以使用你自己的 `CoderRegistry` 来查找给定类型的默认编码器，或者为给定类型注册新的默认编码器。
 
-`CoderRegistry` contains a default mapping of coders to standard
-<span class="language-java">Java</span><span class="language-py">Python</span>
-types for any pipeline you create using the Beam SDK for
-<span class="language-java">Java</span><span class="language-py">Python</span>.
-The following table shows the standard mapping:
+`CoderRegistry` 包含使用针对JavaPython的Beam SDK创建的任何管道的编码器到标准JavaPython类型的默认映射。 下表显示了标准映射：
 
 <table>
   <thead>
@@ -1786,35 +1620,16 @@ The following table shows the standard mapping:
 #### 6.2.1. 查找一个默认编码器 {#default-coder-lookup}
 
 
-You can use the method `CoderRegistry.getCoder` to determine the default
-Coder for a Java type. You can access the `CoderRegistry` for a given pipeline
-by using the method `Pipeline.getCoderRegistry`. This allows you to determine
-(or set) the default Coder for a Java type on a per-pipeline basis: i.e. "for
-this pipeline, verify that Integer values are encoded using
-`BigEndianIntegerCoder`."
+您可以使用 `CoderRegistry.getCoder` 方法来确定Java类型的默认编码器。 您可以使用方法 `Pipeline.getCoderRegistry` 访问给定管道的 `CoderRegistry` 。 这允许您基于每个管道确定（或设置）Java类型的默认编码器：即“对于这个管道，验证的整数值是使用`BigEndianIntegerCoder`编码的”。
 
 
-You can use the method `CoderRegistry.get_coder` to determine the default Coder
-for a Python type. You can use `coders.registry` to access the `CoderRegistry`.
-This allows you to determine (or set) the default Coder for a Python type.
+您可以使用 `CoderRegistry.get_coder` 方法来确定Python类型的默认编码器。 您可以使用 `coders.registry` 访问 `CoderRegistry`。 这允许您确定（或设置）Python类型的默认编码器。
 
 #### 6.2.2. 设置一个类型的默认编码器 {#setting-default-coder}
 
-To set the default Coder for a
-<span class="language-java">Java</span><span class="language-py">Python</span>
-type for a particular pipeline, you obtain and modify the pipeline's
-`CoderRegistry`. You use the method
-<span class="language-java">`Pipeline.getCoderRegistry`</span>
-<span class="language-py">`coders.registry`</span>
-to get the `CoderRegistry` object, and then use the method
-<span class="language-java">`CoderRegistry.registerCoder`</span>
-<span class="language-py">`CoderRegistry.register_coder`</span>
-to register a new `Coder` for the target type.
+要为一个特定管道设置JavaPython类型的默认编码器，您需要获取并修改管道的 `CoderRegistry` 。 你使用方法`Pipeline.getCoderRegistry`，`coders.registry`获取 `CoderRegistry` 对象，然后使用方法`CoderRegistry.registerCoder`，`CoderRegistry.register_coder`为目标类型注册新的 `Coder`。
 
-The following example code demonstrates how to set a default Coder, in this case
-`BigEndianIntegerCoder`, for
-<span class="language-java">Integer</span><span class="language-py">int</span>
-values for a pipeline.
+以下示例代码演示了如何为管道的Integerint值设置默认编码器（在本例中为`BigEndianIntegerCoder`）。
 
 ```java
 PipelineOptions options = PipelineOptionsFactory.create();
@@ -1830,11 +1645,7 @@ apache_beam.coders.registry.register_coder(int, BigEndianIntegerCoder)
 
 #### 6.2.3. 使用默认编码器注解自定义数据类型 {#annotating-custom-type-default-coder}
 
-
-If your pipeline program defines a custom data type, you can use the
-`@DefaultCoder` annotation to specify the coder to use with that type. For
-example, let's say you have a custom data type for which you want to use
-`SerializableCoder`. You can use the `@DefaultCoder` annotation as follows:
+如果你的管道程序定义了自定义数据类型，你可以使用 `@DefaultCoder` 注解来指定要与该类型一起使用的编码器。 例如，假设您有一个要使用 `SerializableCoder` 的自定义数据类型。 您可以使用 `@DefaultCoder` 注解，如下所示：
 
 ```java
 @DefaultCoder(AvroCoder.class)
@@ -1844,9 +1655,7 @@ public class MyCustomDataType {
 ```
 
 
-If you've created a custom coder to match your data type, and you want to use
-the `@DefaultCoder` annotation, your coder class must implement a static
-`Coder.of(Class<T>)` factory method.
+如果您已创建了一个自定义编码器来匹配你的数据类型，并且您想使用 `@DefaultCoder` 注解，那么你的编码器类必须实现静态 `Coder.of(Class<T>)` 工厂方法。
 
 ```java
 public class MyCustomCoder implements Coder {
@@ -1860,160 +1669,84 @@ public class MyCustomDataType {
 }
 ```
 
-
-The Beam SDK for Python does not support annotating data types with a default
-coder. If you would like to set a default coder, use the method described in the
-previous section, *Setting the default coder for a type*.
+Python的Beam SDK不支持使用默认编码器注解数据类型。 如果要设置默认编码器，请使用上一节*为一个类型设置默认编码器*中描述的方法。
 
 ## 7. 窗口 {#windowing}
 
-Windowing subdivides a `PCollection` according to the timestamps of its
-individual elements. Transforms that aggregate multiple elements, such as
-`GroupByKey` and `Combine`, work implicitly on a per-window basis — they process
-each `PCollection` as a succession of multiple, finite windows, though the
-entire collection itself may be of unbounded size.
+窗口化根据它们的各个元素的时间戳细分一个 `PCollection` 。 变换聚合多个元素（例如 `GroupByKey` 和 `Combine`）在每个窗口的基础上隐式工作 - 它们将每个 `PCollection` 转化为一个接一个的多个有限窗口处理，尽管整个集合本身可能具有无限大小。
 
-A related concept, called **triggers**, determines when to emit the results of
-aggregation as unbounded data arrives. You can use triggers to refine the
-windowing strategy for your `PCollection`. Triggers allow you to deal with
-late-arriving data or to provide early results. See the [triggers](#triggers)
-section for more information.
+一个相关的概念，称为**触发器**，它确定何时在无界数据到达时发出聚合结果。你可以使用触发器来优化 `PCollection` 的窗口策略。 触发器允许你处理后期达到的数据或提供早期结果。 有关更多信息，请参阅[触发器](#triggers)部分。
 
 ### 7.1.窗口基础知识 {#windowing-basics}
 
-Some Beam transforms, such as `GroupByKey` and `Combine`, group multiple
-elements by a common key. Ordinarily, that grouping operation groups all of the
-elements that have the same key within the entire data set. With an unbounded
-data set, it is impossible to collect all of the elements, since new elements
-are constantly being added and may be infinitely many (e.g. streaming data). If
-you are working with unbounded `PCollection`s, windowing is especially useful.
+一些Beam变换（例如 `GroupByKey` 和 `Combine`），通过一个公共键对多个元素进行分组。 通常，将整个数据集中具有相同键的所有元素进行分组操作。 利用无界数据集，不可能收集所有元素，因为新元素不断被添加并且可能无限多（例如流数据）。 如果您正在使用无界 `PCollection`，则窗口化尤其有用。
 
-In the Beam model, any `PCollection` (including unbounded `PCollection`s) can be
-subdivided into logical windows. Each element in a `PCollection` is assigned to
-one or more windows according to the `PCollection`'s windowing function, and
-each individual window contains a finite number of elements. Grouping transforms
-then consider each `PCollection`'s elements on a per-window basis. `GroupByKey`,
-for example, implicitly groups the elements of a `PCollection` by _key and
-window_.
+在Beam模型中，任何 `PCollection` （包括无界 `PCollection`）都可以细分为逻辑窗口。 根据 `PCollection` 的窗口函数将 `PCollection` 中的每个元素分配给一个或多个窗口，并且每个单独的窗口包含有限数量的元素。然后，对变换进行分组，在每个窗口的基础上考虑每个 `PCollection` 的元素。 例如，`GroupByKey` 通过键和窗口隐式地对 `PCollection`的元素进行分组。
 
-**Caution:** Beam's default windowing behavior is to assign all elements of a
-`PCollection` to a single, global window and discard late data, _even for
-unbounded `PCollection`s_. Before you use a grouping transform such as
-`GroupByKey` on an unbounded `PCollection`, you must do at least one of the
-following:
- * Set a non-global windowing function. See [Setting your PCollection's
-   windowing function](#setting-your-pcollections-windowing-function).
- * Set a non-default [trigger](#triggers). This allows the global window to emit
-   results under other conditions, since the default windowing behavior (waiting
-   for all data to arrive) will never occur.
+**警告:** Beam的默认窗口行为是将 `PCollection` 的所有元素分配给单个全局窗口并丢弃后期数据，即使对于无界 `PCollection` 也是如此。 在无界 `PCollection` 上使用 `GroupByKey` 之类的分组转换之前，必须至少执行以下操作之一：
+ 
+ * 设置一个非全局窗口函数。 请参阅[设置PCollection的窗口函数](#setting-your-pcollections-windowing-function)。
+ * 设置一个非默认[触发器](#triggers)。 这允许全局窗口在其他条件下发出结果，因为默认的窗口行为（等待所有数据到达）将永远不会发生。
 
-If you don't set a non-global windowing function or a non-default trigger for
-your unbounded `PCollection` and subsequently use a grouping transform such as
-`GroupByKey` or `Combine`, your pipeline will generate an error upon
-construction and your job will fail.
+如果没有为无界 `PCollection` 设置非全局窗口函数或非默认触发器，并随后使用分组转换（如 `GroupByKey` 或 `Combine`），则管道将在构造时生成错误，您的作业将失败。
 
 #### 7.1.1. 窗口约束 {#windowing-constraints}
 
-After you set the windowing function for a `PCollection`, the elements' windows
-are used the next time you apply a grouping transform to that `PCollection`.
-Window grouping occurs on an as-needed basis. If you set a windowing function
-using the `Window` transform, each element is assigned to a window, but the
-windows are not considered until `GroupByKey` or `Combine` aggregates across a
-window and key. This can have different effects on your pipeline.  Consider the
-example pipeline in the figure below:
+在为 `PCollection` 设置窗口函数后，下次将分组变换应用于该 `PCollection` 时将使用元素的窗口。 根据需要对窗口进行分组。如果使用 `Window` 变换设置窗口函数，则会将每个元素分配给一个窗口，但只有在 `GroupByKey` 或 `Combine` 跨窗口和键聚合时才会考虑窗口。 这可能会对您的管道产生不同的影响。 考虑下图中的管道示例：
 
-![Diagram of pipeline applying windowing]({{ "/images/windowing-pipeline-unbounded.png" | prepend: site.baseurl }} "Pipeline applying windowing")
+<img src="https://beam.apache.org/images/windowing-pipeline-unbounded.png" alt="应用窗口的管道图">
 
-**Figure:** Pipeline applying windowing
+**图:** 管道应用窗口
 
-In the above pipeline, we create an unbounded `PCollection` by reading a set of
-key/value pairs using `KafkaIO`, and then apply a windowing function to that
-collection using the `Window` transform. We then apply a `ParDo` to the the
-collection, and then later group the result of that `ParDo` using `GroupByKey`.
-The windowing function has no effect on the `ParDo` transform, because the
-windows are not actually used until they're needed for the `GroupByKey`.
-Subsequent transforms, however, are applied to the result of the `GroupByKey` --
-data is grouped by both key and window.
+在上面的管道中，我们通过使用 `KafkaIO` 读取一组键/值对来创建一个无界 `PCollection` ，然后使用 `Window` 变换将窗口函数应用于该集合。 然后，我们将 `ParDo` 应用于集合，然后使用 `GroupByKey` 对该 `ParDo` 的结果进行分组。 窗口函数对 `ParDo` 转换没有影响，因为在 `GroupByKey` 需要窗口之前，实际上并未使用窗口。 但是，后续变换将应用于 `GroupByKey` 的结果 - 数据按键和窗口分组。
 
 #### 7.1.2. 使用有界PCollections进行窗口化 {#windowing-bounded-collections}
 
-You can use windowing with fixed-size data sets in **bounded** `PCollection`s.
-However, note that windowing considers only the implicit timestamps attached to
-each element of a `PCollection`, and data sources that create fixed data sets
-(such as `TextIO`) assign the same timestamp to every element. This means that
-all the elements are by default part of a single, global window.
+您可以在**有界** `PCollection` 中使用具有固定大小数据集的窗口。 但是，请注意，窗口仅考虑附加到 `PCollection` 的每个元素的隐式时间戳，并且创建固定数据集（例如 `TextIO`）的数据源为每个元素分配相同的时间戳。 这意味着默认情况下，所有元素都是单个全局窗口的一部分。
 
-To use windowing with fixed data sets, you can assign your own timestamps to
-each element. To assign timestamps to elements, use a `ParDo` transform with a
-`DoFn` that outputs each element with a new timestamp (for example, the
-[WithTimestamps](https://beam.apache.org/releases/javadoc/{{ site.release_latest }}/index.html?org/apache/beam/sdk/transforms/WithTimestamps.html)
-transform in the Beam SDK for Java).
+要使用具有固定数据集的窗口，你可以为每个元素分配自己的时间戳。 要为元素分配时间戳，请使用带有 `DoFn` 的 `ParDo` 变换，该变换使用新的时间戳输出每个元素（例如，用于Java的Beam SDK中的[WithTimestamps](https://beam.apache.org/releases/javadoc/2.13.0/index.html?org/apache/beam/sdk/transforms/WithTimestamps.html)变换）。
 
-To illustrate how windowing with a bounded `PCollection` can affect how your
-pipeline processes data, consider the following pipeline:
+为了说明有界 `PCollection` 的窗口化如何影响管道处理数据的方式，请考虑以下管道：
 
-![Diagram of GroupByKey and ParDo without windowing, on a bounded collection]({{ "/images/unwindowed-pipeline-bounded.png" | prepend: site.baseurl }} "GroupByKey and ParDo without windowing, on a bounded collection")
+<img src="https://beam.apache.org/images/unwindowed-pipeline-bounded.png" alt="在有界集合上没有窗口的GroupByKey和ParDo图">
 
-**Figure:** `GroupByKey` and `ParDo` without windowing, on a bounded collection.
+**图:** 在一个有界集合上，`GroupByKey` 和 `ParDo` 没有窗口。
 
-In the above pipeline, we create a bounded `PCollection` by reading a set of
-key/value pairs using `TextIO`. We then group the collection using `GroupByKey`,
-and apply a `ParDo` transform to the grouped `PCollection`. In this example, the
-`GroupByKey` creates a collection of unique keys, and then `ParDo` gets applied
-exactly once per key.
+在上面的管道中，我们通过使用 `TextIO` 读取一组键/值对来创建一个有界 `PCollection` 。 然后，我们使用 `GroupByKey` 对集合进行分组，并将 `ParDo` 变换应用于分组的 `PCollection`。 在此示例中，`GroupByKey` 创建一组唯一键，然后 `ParDo` 为每个键只应用一次。
 
-Note that even if you don’t set a windowing function, there is still a window --
-all elements in your `PCollection` are assigned to a single global window.
+请注意，即使您没有设置窗口函数，仍然有一个窗口 - 你的 `PCollection` 中的所有元素都分配给一个全局窗口。
 
-Now, consider the same pipeline, but using a windowing function:
+现在，考虑相同的管道，但使用窗口函数：
 
-![Diagram of GroupByKey and ParDo with windowing, on a bounded collection]({{ "/images/windowing-pipeline-bounded.png" | prepend: site.baseurl }} "GroupByKey and ParDo with windowing, on a bounded collection")
+<img src="https://beam.apache.org/images/windowing-pipeline-bounded.png" alt="在一个有界集合上,具有窗口的GroupByKey和ParDo图">
 
-**Figure:** `GroupByKey` and `ParDo` with windowing, on a bounded collection.
+**图:** 在一个有界集合上,具有窗口的 `GroupByKey` 和 `ParDo` 图
 
-As before, the pipeline creates a bounded `PCollection` of key/value pairs. We
-then set a [windowing function](#setting-your-pcollections-windowing-function)
-for that `PCollection`.  The `GroupByKey` transform groups the elements of the
-`PCollection` by both key and window, based on the windowing function. The
-subsequent `ParDo` transform gets applied multiple times per key, once for each
-window.
+和前面一样，管道创建了一个键/值对的有界 `PCollection` 。 然后我们为该 `PCollection` 设置一个[窗口函数](#setting-your-pcollections-windowing-function)。  `GroupByKey` 变换基于窗口函数通过键和窗口对 `PCollection` 的元素进行分组。后续的 `ParDo` 变换为每个键应用多次，每个窗口一次。
 
 ### 7.2. 提供了窗口函数 {#provided-windowing-functions}
 
-You can define different kinds of windows to divide the elements of your
-`PCollection`. Beam provides several windowing functions, including:
+您可以定义不同类型的窗口来划分 `PCollection` 的元素。 Beam提供多种窗口功能，包括：
+*  固定时间窗口
+*  滑动时间窗口
+*  每会话窗口
+*  单一全局窗口
+*  基于日历的窗口 (Python的Beam SDK不支持)
 
-*  Fixed Time Windows
-*  Sliding Time Windows
-*  Per-Session Windows
-*  Single Global Window
-*  Calendar-based Windows (not supported by the Beam SDK for Python)
+如果您有更复杂的需求，也可以定义自己的 `WindowFn`。
 
-You can also define your own `WindowFn` if you have a more complex need.
-
-Note that each element can logically belong to more than one window, depending
-on the windowing function you use. Sliding time windowing, for example, creates
-overlapping windows wherein a single element can be assigned to multiple
-windows.
+请注意，每个元素在逻辑上可以属于多个窗口，具体取决于你使用的窗口函数。 例如，滑动时间窗口创建重叠窗口，其中可以将单个元素分配给多个窗口。
 
 
 #### 7.2.1. 固定时间窗口 {#fixed-time-windows}
 
-The simplest form of windowing is using **fixed time windows**: given a
-timestamped `PCollection` which might be continuously updating, each window
-might capture (for example) all elements with timestamps that fall into a five
-minute interval.
+最简单的窗口形式是使用**固定时间窗口**：给定一个带时间戳的 `PCollection` ，它可以不断更新，每个窗口可以捕获（例如）所有时间戳的元素，这些元素的时间间隔为5分钟。
 
-A fixed time window represents a consistent duration, non overlapping time
-interval in the data stream. Consider windows with a five-minute duration: all
-of the elements in your unbounded `PCollection` with timestamp values from
-0:00:00 up to (but not including) 0:05:00 belong to the first window, elements
-with timestamp values from 0:05:00 up to (but not including) 0:10:00 belong to
-the second window, and so on.
+固定时间窗口表示数据流中的一致持续时间，非重叠时间间隔。 考虑具有五分钟持续时间的窗口：时间戳值从0:00:00到0:05:00（但不包括）的无界 `PCollection` 中的所有元素都属于第一个窗口，元素的时间戳值为0 ：05：00到0:10:00（但不包括）属于第二个窗口，依此类推。
 
-![Diagram of fixed time windows, 30s in duration]({{ "/images/fixed-time-windows.png" | prepend: site.baseurl }} "Fixed time windows, 30s in duration")
+<img src="https://beam.apache.org/images/fixed-time-windows.png" alt="固定时间窗口图，持续时间为30秒">
 
-**Figure:** Fixed time windows, 30s in duration.
+**图:** 固定时间窗口图，持续时间为30秒
 
 #### 7.2.2. 滑动时间窗口 {#sliding-time-windows}
 
@@ -2064,7 +1797,7 @@ processing, which is not possible with continuously updating data. To perform
 aggregations on an unbounded `PCollection` that uses global windowing, you
 should specify a non-default trigger for that `PCollection`.
 
-### 7.3. 设置您PCollection的窗口函数 {#setting-your-pcollections-windowing-function}
+### 7.3. 设置你PCollection的窗口函数 {#setting-your-pcollections-windowing-function}
 
 You can set the windowing function for a `PCollection` by applying the `Window`
 transform. When you apply the `Window` transform, you must provide a `WindowFn`.
