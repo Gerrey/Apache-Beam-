@@ -1750,70 +1750,37 @@ Python的Beam SDK不支持使用默认编码器注解数据类型。 如果要�
 
 #### 7.2.2. 滑动时间窗口 {#sliding-time-windows}
 
-A **sliding time window** also represents time intervals in the data stream;
-however, sliding time windows can overlap. For example, each window might
-capture five minutes worth of data, but a new window starts every ten seconds.
-The frequency with which sliding windows begin is called the _period_.
-Therefore, our example would have a window _duration_ of five minutes and a
-_period_ of ten seconds.
+一个**滑动时间窗口**还表示数据流中的时间间隔; 然而，滑动时间窗口可以重叠。 例如，每个窗口可能会捕获5分钟的数据，但每隔10秒就会启动一个新窗口。 滑动窗口开始的频率称为 _周期_。 因此，我们的示例将具有5分钟的窗口 _持续_ 时间和10秒的时间 _周期_。
 
-Because multiple windows overlap, most elements in a data set will belong to
-more than one window. This kind of windowing is useful for taking running
-averages of data; using sliding time windows, you can compute a running average
-of the past five minutes' worth of data, updated every ten seconds, in our
-example.
+由于多个窗口重叠，因此数据集中的大多数元素将属于多个窗口。 这种窗口对于获取数据运行平均值很有用; 使用滑动时间窗口，您可以计算过去5分钟数据的运行平均值，在我们的示例中每10秒更新一次。
 
-![Diagram of sliding time windows, with 1 minute window duration and 30s window period]({{ "/images/sliding-time-windows.png" | prepend: site.baseurl }} "Sliding time windows, with 1 minute window duration and 30s window period")
+<img src="https://beam.apache.org/images/sliding-time-windows.png" alt="滑动时间窗口示意图，窗口持续时间为1分钟，窗口周期为30秒">
 
-**Figure:** Sliding time windows, with 1 minute window duration and 30s window
-period.
+**图:** 滑动时间窗口，窗口持续时间为1分钟，窗口周期为30秒。
 
 #### 7.2.3. 会话窗口 {#session-windows}
 
-A **session window** function defines windows that contain elements that are
-within a certain gap duration of another element. Session windowing applies on a
-per-key basis and is useful for data that is irregularly distributed with
-respect to time. For example, a data stream representing user mouse activity may
-have long periods of idle time interspersed with high concentrations of clicks.
-If data arrives after the minimum specified gap duration time, this initiates
-the start of a new window.
+一个**会话窗口**函数定义包含元素的窗口，这些元素在另一个元素的特定间隔持续时间内。 会话窗口适用于每个键的基础之上，对于随时间不规则分布的数据非常有用。 例如，表示用户鼠标活动的数据流可能有很长一段空闲时间，其间穿插着大量单击。如果数据在指定的最小间隔持续时间之后到达，则启动新窗口的开始。
 
-![Diagram of session windows with a minimum gap duration]({{ "/images/session-windows.png" | prepend: site.baseurl }} "Session windows, with a minimum gap duration")
+<img src="https://beam.apache.org/images/session-windows.png" alt="具有最小间隙持续时间的会话窗口图">
 
-**Figure:** Session windows, with a minimum gap duration. Note how each data key
-has different windows, according to its data distribution.
+**图:** 会话窗口，具有最小的间隔时间。注意，根据数据分布，每个数据键都有不同的窗口。
 
 #### 7.2.4. 单一的全局窗口 {#single-global-window}
 
-By default, all data in a `PCollection` is assigned to the single global window,
-and late data is discarded. If your data set is of a fixed size, you can use the
-global window default for your `PCollection`.
+默认情况下， `PCollection` 中的所有数据都被分配给单个全局窗口，并且后期数据将被丢弃。 如果你的数据集具有固定大小，则可以对你的  `PCollection`  使用全局窗口默认值。
 
-You can use the single global window if you are working with an unbounded data set
-(e.g. from a streaming data source) but use caution when applying aggregating
-transforms such as `GroupByKey` and `Combine`. The single global window with a
-default trigger generally requires the entire data set to be available before
-processing, which is not possible with continuously updating data. To perform
-aggregations on an unbounded `PCollection` that uses global windowing, you
-should specify a non-default trigger for that `PCollection`.
+如果你使用的是无界数据集（例如，来自流数据源），则可以使用单个全局窗口，但在应用聚合变换（例如 `GroupByKey` 和 `Combine`）时要小心。 带有默认触发器的单个全局窗口通常要求在处理之前整个数据集是可用的，而连续更新数据是不可能做到这一点的。 要对使用全局窗口的无界 `PCollection` 执行聚合，您应该为该 `PCollection` 指定一个非默认触发器。
 
 ### 7.3. 设置你PCollection的窗口函数 {#setting-your-pcollections-windowing-function}
 
-You can set the windowing function for a `PCollection` by applying the `Window`
-transform. When you apply the `Window` transform, you must provide a `WindowFn`.
-The `WindowFn` determines the windowing function your `PCollection` will use for
-subsequent grouping transforms, such as a fixed or sliding time window.
+您可以通过应用 `Window` 变换为一个 `PCollection`设置窗口函数。 应用 `Window` 变换时，必须提供一个 `WindowFn`。  `WindowFn` 确定 `PCollection` 将用于后续分组变换的窗口函数，例如固定或滑动时间窗口。
 
-When you set a windowing function, you may also want to set a trigger for your
-`PCollection`. The trigger determines when each individual window is aggregated
-and emitted, and helps refine how the windowing function performs with respect
-to late data and computing early results. See the [triggers](#triggers) section
-for more information.
+当你设置窗口函数时，您可能还需要为 `PCollection` 设置一个触发器。 触发器确定何时聚合和发出每个单独的窗口，并且有助于改进窗口函数对于后期数据和计算早期结果的执行方式。 有关更多信息，请参阅[触发器](#triggers)部分。
 
 #### 7.3.1. 固定时间窗口 {#using-fixed-time-windows}
 
-The following example code shows how to apply `Window` to divide a `PCollection`
-into fixed windows, each 60 seconds in length:
+以下示例代码显示如何应用 `Window` 将一个 `PCollection` 分成固定窗口，每个窗口的长度为60秒：
 
 ```java
     PCollection<String> items = ...;
@@ -1828,9 +1795,7 @@ fixed_windowed_items = (
 
 #### 7.3.2. 滑动时间窗口 {#using-sliding-time-windows}
 
-The following example code shows how to apply `Window` to divide a `PCollection`
-into sliding time windows. Each window is 30 seconds in length, and a new window
-begins every five seconds:
+以下示例代码显示了如何应用 `Window` 将一个 `PCollection` 划分为滑动时间窗口。 每个窗口的长度为30秒，每5秒钟开始一个新窗口：
 
 ```java
     PCollection<String> items = ...;
@@ -1845,9 +1810,7 @@ sliding_windowed_items = (
 
 #### 7.3.3. 会话窗口 {#using-session-windows}
 
-The following example code shows how to apply `Window` to divide a `PCollection`
-into session windows, where each session must be separated by a time gap of at
-least 10 minutes (600 seconds):
+以下示例代码显示了如何应用 `Window` 将一个 `PCollection` 划分为会话窗口，其中每个会话必须以至少10分钟（600秒）的时间间隔分隔：
 
 ```java
     PCollection<String> items = ...;
@@ -1860,14 +1823,12 @@ session_windowed_items = (
     items | 'window' >> beam.WindowInto(window.Sessions(10 * 60)))
 ```
 
-Note that the sessions are per-key — each key in the collection will have its
-own session groupings depending on the data distribution.
+请注意，会话是每键一个 - 集合中的每个键都有自己的会话分组，具体取决于数据分布。
+
 
 #### 7.3.4. 单一的全局窗口 {#using-single-global-window}
 
-If your `PCollection` is bounded (the size is fixed), you can assign all the
-elements to a single global window. The following example code shows how to set
-a single global window for a `PCollection`:
+如果您的 `PCollection` 是有界（大小固定）的，您可以将所有元素分配到单个全局窗口。 以下示例代码显示如何为一个 `PCollection` 设置单个全局窗口：
 
 ```java
     PCollection<String> items = ...;
@@ -1882,53 +1843,23 @@ session_windowed_items = (
 
 ### 7.4. 水印和后期数据 {#watermarks-and-late-data}
 
-In any data processing system, there is a certain amount of lag between the time
-a data event occurs (the "event time", determined by the timestamp on the data
-element itself) and the time the actual data element gets processed at any stage
-in your pipeline (the "processing time", determined by the clock on the system
-processing the element). In addition, there are no guarantees that data events
-will appear in your pipeline in the same order that they were generated.
+在任何数据处理系统中，数据事件发生的时间（“事件时间”，由数据元素本身的时间戳确定）与你的管道中任何阶段处理实际数据元素的时间（“处理时间”，由处理元素的系统上的时钟决定）之间存在一定的延迟。 此外，不能保证数据事件将以生成它们的相同顺序出现在您的管道中。
 
-For example, let's say we have a `PCollection` that's using fixed-time
-windowing, with windows that are five minutes long. For each window, Beam must
-collect all the data with an _event time_ timestamp in the given window range
-(between 0:00 and 4:59 in the first window, for instance). Data with timestamps
-outside that range (data from 5:00 or later) belong to a different window.
+例如，假设我们有一个使用固定时间窗口的 `PCollection` ，窗口长达5分钟。 对于每个窗口，Beam必须在给定的窗口范围内收集具有事件时间戳的所有数据（例如，在第一个窗口中的0:00和4:59之间）。 时间戳超出该范围的数据（来自5:00或更晚的数据）属于不同的窗口。
 
-However, data isn't always guaranteed to arrive in a pipeline in time order, or
-to always arrive at predictable intervals. Beam tracks a _watermark_, which is
-the system's notion of when all data in a certain window can be expected to have
-arrived in the pipeline. Once the watermark progresses past the end of a window,
-any further element that arrives with a timestamp in that window is considered
-**后期数据**.
+但是，并不总能保证数据按时间顺序到达管道，或始终以可预测的间隔到达。 Beam跟踪 _水印_，这是系统的概念，即即当某个窗口中的所有数据都可以预期到达管道时。 一旦 _水印_ 越过窗口的末尾，在该窗口中带有时间戳的任何其他元素被认为是**延迟数据**。
 
-From our example, suppose we have a simple watermark that assumes approximately
-30s of lag time between the data timestamps (the event time) and the time the
-data appears in the pipeline (the processing time), then Beam would close the
-first window at 5:30. If a data record arrives at 5:34, but with a timestamp
-that would put it in the 0:00-4:59 window (say, 3:38), then that record is late
-data.
+从我们的示例中，假设我们有一个简单的水印，假设数据时间戳（事件时间）和数据在管道中出现的时间（处理时间）之间的延迟时间约为30秒，那么Beam将在5：30关闭第一个窗口。 如果数据记录在5:34到达，但是时间戳会将它置于0：00-4：59窗口（例如，3：38），则该记录就是延迟数据。
 
-Note: For simplicity, we've assumed that we're using a very straightforward
-watermark that estimates the lag time. In practice, your `PCollection`'s data
-source determines the watermark, and watermarks can be more precise or complex.
+注意：为简单起见，我们假设我们使用非常直观的水印来估计延迟时间。 实际上， `PCollection` 的数据源确定了水印，水印可以更精确或更复杂。
 
-Beam's default windowing configuration tries to determines when all data has
-arrived (based on the type of data source) and then advances the watermark past
-the end of the window. This default configuration does _not_ allow late data.
-[Triggers](#triggers) allow you to modify and refine the windowing strategy for
-a `PCollection`. You can use triggers to decide when each individual window
-aggregates and reports its results, including how the window emits late
-elements.
+Beam的默认窗口配置尝试确定所有数据何时到达（基于数据源的类型），然后将水印推进到窗口的末尾。 此默认配置不允许延迟数据。 [触发器](#triggers)允许您修改和优化一个 `PCollection` 的窗口策略。 您可以使用触发器来确定每个单独窗口何时聚合并报告其结果，包括窗口如何发出后期元素。
 
 #### 7.4.1. 管理后期数据 {#managing-late-data}
 
-> **Note:** Managing late data is not supported in the Beam SDK for Python.
+> **注意:** Python的Beam SDK不支持管理延迟数据。
 
-You can allow late data by invoking the `.withAllowedLateness` operation when
-you set your `PCollection`'s windowing strategy. The following code example
-demonstrates a windowing strategy that will allow late data up to two days after
-the end of a window.
+当你在设置你的 `PCollection` 的窗口策略时，可以通过调用 `.withAllowedLateness` 操作来允许延迟数据。 下面的代码示例演示了一种窗口策略，该策略允许在窗口结束后最多两天的延迟数据。
 
 ```java
     PCollection<String> items = ...;
@@ -1936,42 +1867,26 @@ the end of a window.
         Window.<String>into(FixedWindows.of(Duration.standardMinutes(1)))
               .withAllowedLateness(Duration.standardDays(2)));
 ```
-
-When you set `.withAllowedLateness` on a `PCollection`, that allowed lateness
-propagates forward to any subsequent `PCollection` derived from the first
-`PCollection` you applied allowed lateness to. If you want to change the allowed
-lateness later in your pipeline, you must do so explictly by applying
-`Window.configure().withAllowedLateness()`.
+当您在一个 `PCollection` 上设置 `.withAllowedLateness` 时，允许延迟向前传播到从你应用的第一个允许延迟 `PCollection` 派生的任何后续 `PCollection`。 如果你要在稍后的管道中更改允许的延迟，则必须通过应用 `Window.configure().withAllowedLateness()` 来明确地这样做。
 
 ### 7.5. 将时间戳添加到一个PCollection的元素{#adding-timestamps-to-a-pcollections-elements}
 
-An unbounded source provides a timestamp for each element. Depending on your
-unbounded source, you may need to configure how the timestamp is extracted from
-the raw data stream.
+无界数据源为每个元素提供一个时间戳。 根据您的无界数据源，您可能需要配置从原始数据流中提取时间戳的方式。
 
-However, bounded sources (such as a file from `TextIO`) do not provide
-timestamps. If you need timestamps, you must add them to your `PCollection`’s
-elements.
+但是，有界数据源（例如 `TextIO` 中的文件）不提供时间戳。 如果需要时间戳，则必须将它们添加到你的 `PCollection` 的元素中。
 
-You can assign new timestamps to the elements of a `PCollection` by applying a
-[ParDo](#pardo) transform that outputs new elements with timestamps that you
-set.
+你可以通过应用[ParDo](#pardo)变换为一个 `PCollection` 的元素分配新的时间戳，该变换输出带有你设置的时间戳的新元素。
 
-An example might be if your pipeline reads log records from an input file, and
-each log record includes a timestamp field; since your pipeline reads the
-records in from a file, the file source doesn't assign timestamps automatically.
-You can parse the timestamp field from each record and use a `ParDo` transform
-with a `DoFn` to attach the timestamps to each element in your `PCollection`.
+例如，如果您的管道从输入文件中读取日志记录，并且每个日志记录都包含一个时间戳字段; 由于管道从文件中读取记录，因此文件源不会自动分配时间戳。 您可以解析每条记录中的时间戳字段，并使用带有 `DoFn` 的 `ParDo` 变换将时间戳附加到你 `PCollection` 中的每个元素。
 
 ```java
       PCollection<LogEntry> unstampedLogs = ...;
       PCollection<LogEntry> stampedLogs =
           unstampedLogs.apply(ParDo.of(new DoFn<LogEntry, LogEntry>() {
             public void processElement(@Element LogEntry element, OutputReceiver<LogEntry> out) {
-              // Extract the timestamp from log entry we're currently processing.
+              // 从我们当前正在处理的日志项中提取时间戳。
               Instant logTimeStamp = extractTimeStampFromLogEntry(element);
-              // Use OutputReceiver.outputWithTimestamp (rather than
-              // OutputReceiver.output) to emit the entry with timestamp attached.
+              // 使用OutputReceiver.outputWithTimestamp（而不是OutputReceiver.output）来发出附加了时间戳的条目。
               out.outputWithTimestamp(element, logTimeStamp);
             }
           }));
@@ -1980,11 +1895,9 @@ with a `DoFn` to attach the timestamps to each element in your `PCollection`.
 class AddTimestampDoFn(beam.DoFn):
 
   def process(self, element):
-    # Extract the numeric Unix seconds-since-epoch timestamp to be
-    # associated with the current log entry.
+    # 提取与当前日志项关联的Unix秒纪元以来的时间戳数字。
     unix_timestamp = extract_timestamp_from_log_entry(element)
-    # Wrap and emit the current entry and new timestamp in a
-    # TimestampedValue.
+    # 在TimestampedValue中包装并发出当前项和新时间戳。
     yield beam.window.TimestampedValue(element, unix_timestamp)
 
 timestamped_items = items | 'timestamp' >> beam.ParDo(AddTimestampDoFn())
