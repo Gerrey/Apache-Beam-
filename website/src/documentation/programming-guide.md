@@ -1906,86 +1906,47 @@ timestamped_items = items | 'timestamp' >> beam.ParDo(AddTimestampDoFn())
 
 ## 8. 触发器 {#triggers}
 
-When collecting and grouping data into windows, Beam uses **triggers** to
-determine when to emit the aggregated results of each window (referred to as a
-*pane*). If you use Beam's default windowing configuration and [default
-trigger](#default-trigger), Beam outputs the aggregated result when it
-[estimates all data has arrived](#watermarks-and-late-data), and discards all
-subsequent data for that window.
+在将数据收集并分组到窗口时，Beam使用**触发器**来确定何时发出每个窗口的聚合结果（称为*窗格*）。 如果使用Beam的默认窗口配置和[默认触发器](#default-trigger)，Beam会在[估计所有数据到达时](#watermarks-and-late-data)输出聚合结果，并丢弃该窗口的所有后续数据。
 
-You can set triggers for your `PCollection`s to change this default behavior.
-Beam provides a number of pre-built triggers that you can set:
+您可以为您的 `PCollection`设置触发器来更改此默认行为。 Beam提供了许多可以设置的预构建触发器：
 
-*   **事件时间触发器**. These triggers operate on the event time, as
-    indicated by the timestamp on each data element. Beam's default trigger is
-    event time-based.
-*   **处理时间触发器**. These triggers operate on the processing time
-    -- the time when the data element is processed at any given stage in the
-    pipeline.
-*   **数据驱动触发器**. These triggers operate by examining the data as it
-    arrives in each window, and firing when that data meets a certain property.
-    Currently, data-driven triggers only support firing after a certain number
-    of data elements.
-*   **组合触发器**. These triggers combine multiple triggers in various
-    ways.
+*   **事件时间触发器**. 这些触发器根据每个数据元素上的时间戳对事件时间进行操作。 Beam的默认触发器是基于事件时间的。
+*   **处理时间触发器**. 这些触发器对处理时间(在管道中的任何给定阶段处理数据元素的时间)进行操作。
+*   **数据驱动触发器**. 这些触发器通过在数据到达每个窗口时检查数据来操作，并在数据满足某个属性时触发。 目前，数据驱动的触发器仅支持在一定数量的数据元素之后触发。
+*   **组合触发器**. 这些触发器以各种方式组合多个触发器。
 
-At a high level, triggers provide two additional capabilities compared to simply
-outputting at the end of a window:
+在高层次上，触发器提供了两个额外的功能，而不是简单地在窗口的末尾输出：
 
-*   Triggers allow Beam to emit early results, before all the data in a given
-    window has arrived. For example, emitting after a certain amount of time
-    elapses, or after a certain number of elements arrives.
-*   Triggers allow processing of late data by triggering after the event time
-    watermark passes the end of the window.
+*   触发器允许Beam在给定窗口中的所有数据到达之前发出早期结果。 例如，在经过一定量的时间之后，或在一定数量的元素到达之后发出。
+*  触发器允许在事件时间水印通过窗口末端之后通过触发来处理后期数据。
 
-These capabilities allow you to control the flow of your data and balance
-between different factors depending on your use case:
+这些功能允许您根据用例控制数据流，并在不同因素之间进行平衡：
 
-*   **完整性:** How important is it to have all of your data before you
-    compute your result?
-*   **延迟:** How long do you want to wait for data? For example, do you wait
-    until you think you have all data? Do you process data as it arrives?
-*   **成本:** How much compute power/money are you willing to spend to lower the
-    latency?
+*   **完整性:** 在计算结果之前获取所有数据有多重要？
+*   **延迟:** 您希望等待数据多长时间?例如，您是否会等到您认为您已经拥有了所有的数据之后才这样做?您是否在数据到达时进行处理?
+*   **成本:** 您愿意花多少计算能力/金钱来降低延迟？
 
-For example, a system that requires time-sensitive updates might use a strict
-time-based trigger that emits a window every *N* seconds, valuing promptness
-over data completeness. A system that values data completeness more than the
-exact timing of results might choose to use Beam's default trigger, which fires
-at the end of the window.
+例如，需要对时间敏感的更新的系统可能使用严格的基于时间的触发器，该触发器每N秒发出一个窗口，重视数据的及时性而不是完整性。如果一个系统对数据完整性的重视程度超过结果的确切时间，那么它可能会选择使用Beam的默认触发器，该触发器在窗口的末尾触发。
 
-You can also set a trigger for an unbounded `PCollection` that uses a [single
-global window for its windowing function](#windowing). This can be useful when
-you want your pipeline to provide periodic updates on an unbounded data set —
-for example, a running average of all data provided to the present time, updated
-every N seconds or every N elements.
+您还可以为无界 `PCollection` 设置一个触发器，该触发器[使用单个全局窗口作为其窗口函数](#windowing)。 当您希望管道在无界数据集上提供定期更新时，这非常有用 - 例如，提供给当前时间的所有数据的运行平均值，每N秒更新一次或每N个元素更新一次。
 
 ### 8.1. 事件时间触发器 {#event-time-triggers}
 
-The `AfterWatermark` trigger operates on *event time*. The `AfterWatermark`
-trigger emits the contents of a window after the
-[watermark](#watermarks-and-late-data) passes the end of the window, based on the
-timestamps attached to the data elements. The watermark is a global progress
-metric, and is Beam's notion of input completeness within your pipeline at any
-given point. <span class="language-java">`AfterWatermark.pastEndOfWindow()`</span>
-<span class="language-py">`AfterWatermark`</span> *only* fires when the
-watermark passes the end of the window.
+ `AfterWatermark` 触发器在事件时间运行。 根据附加到数据元素的时间戳， `AfterWatermark` 触发器在[水印](#watermarks-and-late-data)经过窗口末尾后发出窗口内容。 水印是一个全局进度指标，是Beam在任何给定点的管道内输入完整性的概念。 `AfterWatermark.pastEndOfWindow()` `AfterWatermark` *仅*在水印通过窗口末尾时触发。
 
-In addition, you can configure triggers that fire if your pipeline receives data
-before or after the end of the window.
+此外，您可以配置在管道在窗口结束之前或之后接收数据时触发的触发器。
 
-The following example shows a billing scenario, and uses both early and late
-firings:
+下面的示例显示了一个计费场景，并使用了早期和晚期击发:
 
 ```java
-  // Create a bill at the end of the month.
+  // 在月底创建帐单。
   AfterWatermark.pastEndOfWindow()
-      // During the month, get near real-time estimates.
+      // 在这个月里，接近实时估计。
       .withEarlyFirings(
           AfterProcessingTime
               .pastFirstElementInPane()
               .plusDuration(Duration.standardMinutes(1))
-      // Fire on any late data so the bill can be corrected.
+      // 击发任何后期数据，以便更正账单。
       .withLateFirings(AfterPane.elementCountAtLeast(1))
 ```
 ```py
@@ -1997,64 +1958,29 @@ AfterWatermark(
 
 #### 8.1.1. 默认触发器 {#default-trigger}
 
-The default trigger for a `PCollection` is based on event time, and emits the
-results of the window when the Beam's watermark passes the end of the window,
-and then fires each time late data arrives.
+一个 `PCollection` 的默认触发器基于事件时间，并在Beam的水印经过窗口末尾时发出窗口的结果，然后在每次后期数据到达时触发。
 
-However, if you are using both the default windowing configuration and the
-default trigger, the default trigger emits exactly once, and late data is
-discarded. This is because the default windowing configuration has an allowed
-lateness value of 0. See the Handling Late Data section for information about
-modifying this behavior.
+但是，如果同时使用默认窗口配置和默认触发器，则默认触发器只会发出一次，并且会丢弃延迟数据。 这是因为默认窗口配置的允许延迟值为0。有关修改此行为的信息，请参阅处理延迟数据部分。
 
 ### 8.2. 处理时间触发器 {#processing-time-triggers}
 
-The `AfterProcessingTime` trigger operates on *processing time*. For example,
-the <span class="language-java">`AfterProcessingTime.pastFirstElementInPane()`</span>
-<span class="language-py">`AfterProcessingTime`</span> trigger emits a window
-after a certain amount of processing time has passed since data was received.
-The processing time is determined by the system clock, rather than the data
-element's timestamp.
+ `AfterProcessingTime` 触发器按处理时间运行。 例如，`AfterProcessingTime.pastFirstElementInPane()` `AfterProcessingTime`触发器在收到数据后经过一定量的处理时间后发出一个窗口。 处理时间由系统时钟决定，而不是数据元素的时间戳。
 
-The `AfterProcessingTime` trigger is useful for triggering early results from a
-window, particularly a window with a large time frame such as a single global
-window.
+ `AfterProcessingTime` 触发器对于从窗口触发早期结果非常有用，尤其是具有大时间范围的窗口，例如单个全局窗口。
 
 ### 8.3. 数据驱动的触发器 {#data-driven-triggers}
 
-Beam provides one data-driven trigger,
-<span class="language-java">`AfterPane.elementCountAtLeast()`</span>
-<span class="language-py">`AfterCount`</span>. This trigger works on an element
-count; it fires after the current pane has collected at least *N* elements. This
-allows a window to emit early results (before all the data has accumulated),
-which can be particularly useful if you are using a single global window.
+Beam提供了一个数据驱动的触发器，`AfterPane.elementCountAtLeast()` `AfterCount`。 此触发器适用于元素计数; 它在当前窗格收集了至少N个元素后触发。 这允许窗口发出早期结果（在所有数据累积之前），如果您使用单个全局窗口，这可能特别有用。
 
-It is important to note that if, for example, you specify
-<span class="language-java">`.elementCountAtLeast(50)`</span>
-<span class="language-py">AfterCount(50)</span> and only 32 elements arrive,
-those 32 elements sit around forever. If the 32 elements are important to you,
-consider using [composite triggers](#composite-triggers) to combine multiple
-conditions. This allows you to specify multiple firing conditions such as “fire
-either when I receive 50 elements, or every 1 second”.
+需要注意的是，例如，如果指定`.elementCountAtLeast(50)` AfterCount(50)并且只有32个元素到达，那么这32个元素将永远存在。 如果32个元素对您很重要，请考虑使用[组合触发器](#composite-triggers)来组合多个条件。 这允许您指定多个触发条件，例如“当我收到50个元素时触发或每1秒时触发一次”。
 
 ### 8.4. 设置一个触发器 {#setting-a-trigger}
 
-When you set a windowing function for a `PCollection` by using the
-<span class="language-java">`Window`</span><span class="language-py">`WindowInto`</span>
-transform, you can also specify a trigger.
+当使用Window `WindowInto`变换为一个 `PCollection` 设置窗口函数时，还可以指定触发器。
 
-You set the trigger(s) for a `PCollection` by invoking the method
-`.triggering()` on the result of your `Window.into()` transform. This code
-sample sets a time-based trigger for a `PCollection`, which emits results one
-minute after the first element in that window has been processed.  The last line
-in the code sample, `.discardingFiredPanes()`, sets the window's **accumulation
-mode**.
+您可以通过对您的 `Window.into()` 变换的结果调用方法`.triggering()` 来设置一个 `PCollection` 的触发器。 此代码示例为一个 `PCollection` 设置基于时间的触发器，该触发器在处理该窗口中的第一个元素后一分钟发出结果。 代码示例中的最后一行 `.discardingFiredPanes()`设置窗口的**累积模式**。
 
-You set the trigger(s) for a `PCollection` by setting the `trigger` parameter
-when you use the `WindowInto` transform. This code sample sets a time-based
-trigger for a `PCollection`, which emits results one minute after the first
-element in that window has been processed. The `accumulation_mode` parameter
-sets the window's **accumulation mode**.
+您可以通过在使用一个 `WindowInto` 变换时，通过设置 `trigger` 参数来为一个 `PCollection` 设置触发器。 此代码示例为一个 `PCollection` 设置基于时间的触发器，该触发器在处理该窗口中的第一个元素后一分钟发出结果。 `accumulation_mode` 参数设置窗口的**累积模式**。
 
 ```java
   PCollection<String> pc = ...;
@@ -2072,42 +1998,24 @@ pcollection | WindowInto(
 
 #### 8.4.1. 窗口累积模式 {#window-accumulation-modes}
 
-When you specify a trigger, you must also set the the window's **accumulation
-mode**. When a trigger fires, it emits the current contents of the window as a
-pane. Since a trigger can fire multiple times, the accumulation mode determines
-whether the system *accumulates* the window panes as the trigger fires, or
-*discards* them.
+指定触发器时，还必须设置窗口的**累积模式**。 当触发器触发时，它会以窗格的形式发出窗口的当前内容。 由于触发器可以多次触发，因此累积模式确定系统是否在触发器触发时累积窗口窗格，或者*丢弃*它们。
 
-To set a window to accumulate the panes that are produced when the trigger
-fires, invoke`.accumulatingFiredPanes()` when you set the trigger. To set a
-window to discard fired panes, invoke `.discardingFiredPanes()`.
+要设置一个窗口以累积触发器触发时生成的窗格，请在设置触发器时调用`.accumulatingFiredPanes()` 。 要设置窗口以丢弃已触发的窗格，请调用 `.discardingFiredPanes()`。
 
-To set a window to accumulate the panes that are produced when the trigger
-fires, set the `accumulation_mode` parameter to `ACCUMULATING` when you set the
-trigger. To set a window to discard fired panes, set `accumulation_mode` to
-`DISCARDING`.
+要设置一个窗口以累积触发器触发时生成的窗格，请在设置触发器时将 `accumulation_mode` 参数设置为 `ACCUMULATING` 。 要设置窗口以放弃已触发的窗格，请将 `accumulation_mode` 设置为`DISCARDING`。
 
-Let's look an example that uses a `PCollection` with fixed-time windowing and a
-data-based trigger. This is something you might do if, for example, each window
-represented a ten-minute running average, but you wanted to display the current
-value of the average in a UI more frequently than every ten minutes. We'll
-assume the following conditions:
+让我们看一个使用具有固定时间窗口和基于数据的触发器的 `PCollection` 的示例。 例如，如果每个窗口代表10分钟的运行平均值，但您希望在每隔10分钟更频繁地显示UI中的平均值，则可以执行此操作。 我们假设以下条件：
 
-*   The `PCollection` uses 10-minute fixed-time windows.
-*   The `PCollection` has a repeating trigger that fires every time 3 elements
-    arrive.
+*   `PCollection` 使用10分钟的固定时间窗口。
+*   `PCollection` 有重复触发器，每次有3个元素到达时触发。
 
-The following diagram shows data events for key X as they arrive in the
-PCollection and are assigned to windows. To keep the diagram a bit simpler,
-we'll assume that the events all arrive in the pipeline in order.
+下图显示了键X到达PCollection并分配给窗口时的数据事件。 为了使图表更简单，我们假设事件全部按顺序到达管道。
 
-![Diagram of data events for acculumating mode example]({{ "/images/trigger-accumulation.png" | prepend: site.baseurl }} "Data events for accumulating mode example")
+<img src="https://beam.apache.org/images/trigger-accumulation.png" alt="用于模拟模式示例的数据事件图">
 
 ##### 8.4.1.1. 累积模式 {#accumulating-mode}
 
-If our trigger is set to accumulating mode, the trigger emits the following
-values each time it fires. Keep in mind that the trigger fires every time three
-elements arrive:
+如果我们的触发器设置为累积模式，则每次触发时触发器都会发出以下值。 请记住，每次有三个元素到达时触发器会触发：
 
 ```
   First trigger firing:  [5, 8, 3]
@@ -2118,8 +2026,7 @@ elements arrive:
 
 ##### 8.4.1.2. 丢弃模式 {#discarding-mode}
 
-If our trigger is set to discarding mode, the trigger emits the following values
-on each firing:
+如果我们的触发器设置为丢弃模式，则触发器会在每次触发时发出以下值：
 
 ```
   First trigger firing:  [5, 8, 3]
@@ -2129,16 +2036,11 @@ on each firing:
 
 #### 8.4.2. 后期数据处理 {#handling-late-data}
 
-> The Beam SDK for Python does not currently support allowed lateness.
+> Python的Beam SDK目前不支持允许延迟。
 
-If you want your pipeline to process data that arrives after the watermark
-passes the end of the window, you can apply an *allowed lateness* when you set
-your windowing configuration. This gives your trigger the opportunity to react
-to the late data. If allowed lateness is set, the default trigger will emit new
-results immediately whenever late data arrives.
+如果您希望管道处理水印通过窗口末尾后到达的数据，则可以在设置窗口配置时应用允许的延迟。 这使您的触发器有机会对迟到的数据做出反应。 如果允许延迟设置，则默认触发器将在延迟数据到达时立即发出新结果。
 
-You set the allowed lateness by using `.withAllowedLateness()` when you set your
-windowing function:
+当你设置窗口函数时，可以使用 `.withAllowedLateness()` 设置允许的延迟：
 
 ```java
   PCollection<String> pc = ...;
@@ -2148,13 +2050,10 @@ windowing function:
                               .withAllowedLateness(Duration.standardMinutes(30));
 ```
 ```py
-  # The Beam SDK for Python does not currently support allowed lateness.
+  # Python的Beam SDK目前不支持允许延迟。
 ```
 
-This allowed lateness propagates to all `PCollection`s derived as a result of
-applying transforms to the original `PCollection`. If you want to change the
-allowed lateness later in your pipeline, you can apply
-`Window.configure().withAllowedLateness()` again, explicitly.
+这允许延迟传播到由于将变换应用于原始 `PCollection` 而导出的所有 `PCollections`。 如果要在管道中稍后更改允许的延迟，可以再次显式应用`Window.configure().withAllowedLateness()` 。
 
 
 ### 8.5. 组合触发器 {#composite-triggers}
