@@ -2058,56 +2058,35 @@ pcollection | WindowInto(
 
 ### 8.5. 组合触发器 {#composite-triggers}
 
-You can combine multiple triggers to form **composite triggers**, and can
-specify a trigger to emit results repeatedly, at most once, or under other
-custom conditions.
+您可以组合多个触发器来形成**组合触发器**，并可以指定一个触发器来重复地(最多一次)或在其他自定义条件下重复发出结果。
 
 #### 8.5.1. 组合触发器类型 {#composite-trigger-types}
 
-Beam includes the following composite triggers:
+Beam包含以下复合触发器：
 
-*   You can add additional early firings or late firings to
-    `AfterWatermark.pastEndOfWindow` via `.withEarlyFirings` and
-    `.withLateFirings`.
-*   `Repeatedly.forever` specifies a trigger that executes forever. Any time the
-    trigger's conditions are met, it causes a window to emit results and then
-    resets and starts over. It can be useful to combine `Repeatedly.forever`
-    with `.orFinally` to specify a condition that causes the repeating trigger
-    to stop.
-*   `AfterEach.inOrder` combines multiple triggers to fire in a specific
-    sequence. Each time a trigger in the sequence emits a window, the sequence
-    advances to the next trigger.
-*   `AfterFirst` takes multiple triggers and emits the first time *any* of its
-    argument triggers is satisfied. This is equivalent to a logical OR operation
-    for multiple triggers.
-*   `AfterAll` takes multiple triggers and emits when *all* of its argument
-    triggers are satisfied. This is equivalent to a logical AND operation for
-    multiple triggers.
-*   `orFinally` can serve as a final condition to cause any trigger to fire one
-    final time and never fire again.
+*  您可以通过 `.withEarlyFirings` 和 `.withLateFirings` 向`AfterWatermark.pastEndOfWindow` 添加额外的早期触发或后期触发。
+*   `Repeatedly.forever` 指定一个永久执行的触发器。 任何时候，只要满足触发条件，就会导致窗口发出结果，然后重置并重新开始。将 `Repeatedly.forever`
+    与 `.orFinally` 结合使用以指定一个导致重复触发器停止的条件会很有用。
+*   `AfterEach.inOrder` 将多个触发器组合在一起以特定的顺序触发。 每次序列中的触发器发出一个窗口时，序列前进到下一个触发器。
+*   `AfterFirst` 接受多个触发器，并在第一次发出任何参数触发器时发出。 这相当于多个触发器的逻辑OR运算。
+*   `AfterAll` 接受多个触发器并在满足其所有参数触发器时发出。 这相当于多个触发器的逻辑AND操作。
+*   `orFinally` 可以作为最终条件，使任何触发器最后一次触发并且永远不再触发。
 
 #### 8.5.2. 使用AfterWatermark组合 {#composite-afterwatermark}
 
-Some of the most useful composite triggers fire a single time when Beam
-estimates that all the data has arrived (i.e. when the watermark passes the end
-of the window) combined with either, or both, of the following:
+当Beam估计所有数据已经到达时（即当水印通过窗口的末尾时）与以下中的任何一个或两个结合时，一些最有用的组合触发器会一次性触发：
 
-*   Speculative firings that precede the watermark passing the end of the window
-    to allow faster processing of partial results.
+*   在水印经过窗口末端之前的投机性触发，以允许更快地处理部分结果。
 
-*   Late firings that happen after the watermark passes the end of the window,
-    to allow for handling late-arriving data
+*  在水印经过窗口末端后发生的延迟触发，以便处理延迟到达的数据
 
-You can express this pattern using `AfterWatermark`. For example, the following
-example trigger code fires on the following conditions:
+您可以使用 `AfterWatermark` 表达此模式。 例如，以下示例触发器代码在以下条件下触发：
 
-*   On Beam's estimate that all the data has arrived (the watermark passes the
-    end of the window)
+*   根据Beam的估计，所有数据都已到达(水印通过窗口的末端)
 
-*   Any time late data arrives, after a ten-minute delay
+*   在延迟十分钟后，任何时候延迟的数据都会到来
 
-*   After two days, we assume no more data of interest will arrive, and the
-    trigger stops executing
+*  两天后，我们假设没有更多感兴趣的数据到达，触发器停止执行
 
 ```java
   .apply(Window
@@ -2129,9 +2108,7 @@ pcollection | WindowInto(
 
 #### 8.5.3. 其他组合触发器 {#other-composite-triggers}
 
-You can also build other sorts of composite triggers. The following example code
-shows a simple composite trigger that fires whenever the pane has at least 100
-elements, or after a minute.
+您还可以构建其他种类的组合触发器。 以下示例代码显示了一个简单的组合触发器，只要当窗格至少有100个元素时，或者超过在一分钟之后，就会触发该触发器。
 
 ```java
   Repeatedly.forever(AfterFirst.of(
